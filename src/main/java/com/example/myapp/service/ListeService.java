@@ -11,6 +11,7 @@ import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ListeService {
@@ -35,9 +36,22 @@ public class ListeService {
         benutzerRepo.save(new Benutzer(username, passwort));
     }
 
-    // Alle Benutzer (für Admin-View)
+    // Alle Benutzer als Liste von Objekten
     public List<Benutzer> getAlleBenutzer() {
         return benutzerRepo.findAll();
+    }
+
+    // Alle Benutzernamen (nur Namen, für AdminController)
+    public List<String> getAlleBenutzerNamen() {
+        return benutzerRepo.findAll().stream()
+                .map(Benutzer::getUsername)
+                .collect(Collectors.toList());
+    }
+
+    // Benutzer löschen + Bestellungen löschen
+    public void deleteBenutzer(String username) {
+        benutzerRepo.deleteById(username);
+        bestellungRepo.deleteAll(bestellungRepo.findByBenutzer(username));
     }
 
     // Bestellungen eines Benutzers
@@ -97,6 +111,28 @@ public class ListeService {
         }
     }
 
+    // ➤ NEU: Benutzerseite generieren (HTML)
+    public String generiereBenutzerSeite(String benutzer) {
+        StringBuilder html = new StringBuilder();
+        html.append("<html><head><title>Benutzerseite</title></head><body>");
+        html.append("<h1>Willkommen, ").append(benutzer).append("</h1>");
+        html.append("<ul>");
+        for (Bestellung b : getBestellungen(benutzer)) {
+            html.append("<li>").append(b.getMaterial()).append(" (").append(b.getAnzahl()).append(")</li>");
+        }
+        html.append("</ul></body></html>");
+        return html.toString();
+    }
+
+    // ➤ NEU: Bestellung löschen, wenn Status in Bearbeitung + kein Eingabedatum
+    public void loescheBestellungWennMoeglich(Long id) {
+        Bestellung b = bestellungRepo.findById(id).orElse(null);
+        if (b != null && "in Bearbeitung".equalsIgnoreCase(b.getStatus()) && b.getEingabedatum() == null) {
+            bestellungRepo.delete(b);
+        }
+    }
+
+    // ZoneId getter
     public ZoneId getZone() {
         return zone;
     }
