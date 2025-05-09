@@ -1,85 +1,35 @@
 package com.example.myapp.model;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.time.LocalDateTime;
 
 @Entity
-public class Bestellung {
+public class Benutzer {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String username;
+    private String passwort;
 
-    private String benutzer;
-    private int anzahl;
-    private String material;
-    private String status;
-    private LocalDateTime eingabedatum;
-    private LocalDateTime rueckgabedatum;
+    public Benutzer() {}
 
-    public Bestellung() {}
-
-    public Bestellung(String benutzer, int anzahl, String material, String status) {
-        this.benutzer = benutzer;
-        this.anzahl = anzahl;
-        this.material = material;
-        this.status = status;
+    public Benutzer(String username, String passwort) {
+        this.username = username;
+        this.passwort = passwort;
     }
 
-    // Getter
-    public Long getId() {
-        return id;
+    public String getUsername() {
+        return username;
     }
 
-    public String getBenutzer() {
-        return benutzer;
+    public String getPasswort() {
+        return passwort;
     }
 
-    public int getAnzahl() {
-        return anzahl;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public String getMaterial() {
-        return material;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public LocalDateTime getEingabedatum() {
-        return eingabedatum;
-    }
-
-    public LocalDateTime getRueckgabedatum() {
-        return rueckgabedatum;
-    }
-
-    // Setter
-    public void setBenutzer(String benutzer) {
-        this.benutzer = benutzer;
-    }
-
-    public void setAnzahl(int anzahl) {
-        this.anzahl = anzahl;
-    }
-
-    public void setMaterial(String material) {
-        this.material = material;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public void setEingabedatum(LocalDateTime eingabedatum) {
-        this.eingabedatum = eingabedatum;
-    }
-
-    public void setRueckgabedatum(LocalDateTime rueckgabedatum) {
-        this.rueckgabedatum = rueckgabedatum;
+    public void setPasswort(String passwort) {
+        this.passwort = passwort;
     }
 }
