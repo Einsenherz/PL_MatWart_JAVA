@@ -5,7 +5,6 @@ import jakarta.persistence.Id;
 
 @Entity
 public class Benutzer {
-
     @Id
     private String username;
     private String passwort;
