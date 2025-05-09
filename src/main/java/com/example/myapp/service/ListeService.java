@@ -1,61 +1,103 @@
 package com.example.myapp.service;
 
-import com.example.myapp.model.Bestellung;
 import com.example.myapp.model.Benutzer;
-import com.example.myapp.repository.BestellungRepository;
+import com.example.myapp.model.Bestellung;
 import com.example.myapp.repository.BenutzerRepository;
+import com.example.myapp.repository.BestellungRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 public class ListeService {
-
     private final BenutzerRepository benutzerRepo;
     private final BestellungRepository bestellungRepo;
-    private final ZoneId zone = ZoneId.of("Europe/Berlin");  // ➔ deine Zeitzone hier festlegen
+    private final ZoneId zone = ZoneId.of("Europe/Zurich"); // DE/CH Zeitzone
 
     public ListeService(BenutzerRepository benutzerRepo, BestellungRepository bestellungRepo) {
         this.benutzerRepo = benutzerRepo;
         this.bestellungRepo = bestellungRepo;
     }
 
-    // ✅ EXISTIERENDE METHODEN HIER BELASSEN...
+    // Login check
+    public boolean checkPasswort(String username, String passwort) {
+        return benutzerRepo.findById(username)
+                .map(b -> b.getPasswort().equals(passwort))
+                .orElse(false);
+    }
 
-    // 🔥 NEUE METHODEN:
+    // Benutzer hinzufügen
+    public void addBenutzer(String username, String passwort) {
+        benutzerRepo.save(new Benutzer(username, passwort));
+    }
 
-    public List<String> getAlleBenutzerNamen() {
-        return benutzerRepo.findAll()
+    // Alle Benutzer (für Admin-View)
+    public List<Benutzer> getAlleBenutzer() {
+        return benutzerRepo.findAll();
+    }
+
+    // Bestellungen eines Benutzers
+    public List<Bestellung> getBestellungen(String benutzer) {
+        return bestellungRepo.findByBenutzer(benutzer)
                 .stream()
-                .map(Benutzer::getUsername)
-                .collect(Collectors.toList());
+                .filter(b -> !"Archiviert".equals(b.getStatus()))
+                .toList();
     }
 
-    public ZoneId getZone() {
-        return this.zone;
+    // Archivierte Bestellungen
+    public List<Bestellung> getAlleArchiviertenBestellungenSorted() {
+        return bestellungRepo.findAll()
+                .stream()
+                .filter(b -> "Archiviert".equals(b.getStatus()))
+                .sorted(Comparator
+                        .comparing(Bestellung::getEingabedatum, Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparing(Bestellung::getMaterial, Comparator.nullsLast(Comparator.naturalOrder())))
+                .toList();
     }
 
-    public void updateStatusMitRueckgabe(Long bestellungId, String neuerStatus) {
-        bestellungRepo.findById(bestellungId).ifPresent(bestellung -> {
-            bestellung.setStatus(neuerStatus);
-            if ("Archiviert".equals(neuerStatus) && bestellung.getRueckgabedatum() == null) {
-                bestellung.setRueckgabedatum(LocalDateTime.now(zone));
+    // Bestellung speichern
+    public void saveBestellung(Bestellung b) {
+        bestellungRepo.save(b);
+    }
+
+    // Bestellung per ID finden
+    public Optional<Bestellung> findBestellungById(Long id) {
+        return bestellungRepo.findById(id);
+    }
+
+    // Bestellung erstellen
+    public void bestelle(String benutzer, int anzahl, String material) {
+        Bestellung b = new Bestellung(benutzer, anzahl, material, "in Bearbeitung");
+        bestellungRepo.save(b);
+    }
+
+    // Status aktualisieren + Rückgabedatum bei Archiviert setzen
+    public void updateStatusMitRueckgabe(Long id, String status) {
+        bestellungRepo.findById(id).ifPresent(b -> {
+            b.setStatus(status);
+            if ("Archiviert".equals(status) && b.getRueckgabedatum() == null) {
+                b.setRueckgabedatum(LocalDateTime.now(zone));
             }
-            bestellungRepo.save(bestellung);
+            bestellungRepo.save(b);
         });
     }
 
-    public List<Bestellung> getAlleArchiviertenBestellungenSorted() {
-        return bestellungRepo.findAll().stream()
-                .filter(b -> "Archiviert".equals(b.getStatus()))
-                .sorted(Comparator
-                        .comparing(Bestellung::getBenutzer)
-                        .thenComparing(Bestellung::getEingabedatum))
-                .collect(Collectors.toList());
+    // Eingabedatum setzen beim "An MatWart senden"
+    public void markiereAlsAbgegeben(String benutzer) {
+        List<Bestellung> liste = bestellungRepo.findByBenutzer(benutzer);
+        for (Bestellung b : liste) {
+            if (b.getEingabedatum() == null) {
+                b.setEingabedatum(LocalDateTime.now(zone));
+                bestellungRepo.save(b);
+            }
+        }
     }
 
+    public ZoneId getZone() {
+        return zone;
+    }
 }
