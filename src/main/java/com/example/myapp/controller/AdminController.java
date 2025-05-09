@@ -19,18 +19,16 @@ public class AdminController {
 
     @GetMapping
     public String adminHome() {
-        return """
-            <html><head><title>Admin</title><style>
-            body { text-align: center; font-family: Arial; }
-            button { font-size: 14px; padding: 5px; margin: 4px; }
-            </style></head><body>
-            <h1>Admin-Bereich</h1>
-            <form method='get' action='/admin/logins'><button type='submit'>Benutzerverwaltung</button></form>
-            <form method='get' action='/admin/listen'><button type='submit'>Bestellungen</button></form>
-            <form method='get' action='/admin/archiv'><button type='submit'>Archiv</button></form>
-            <form method='get' action='/'><button type='submit'>Logout</button></form>
-            </body></html>
-        """;
+        return "<html><head><title>Admin</title><style>"
+                + "body { text-align: center; font-family: Arial; }"
+                + "button { font-size: 14px; padding: 5px; margin: 4px; }"
+                + "</style></head><body>"
+                + "<h1>Admin-Bereich</h1>"
+                + "<form method='get' action='/admin/logins'><button type='submit'>Benutzerverwaltung</button></form>"
+                + "<form method='get' action='/admin/listen'><button type='submit'>Bestellungen</button></form>"
+                + "<form method='get' action='/admin/archiv'><button type='submit'>Archiv</button></form>"
+                + "<form method='get' action='/'><button type='submit'>Logout</button></form>"
+                + "</body></html>";
     }
 
     @GetMapping("/logins")
@@ -48,32 +46,24 @@ public class AdminController {
         html.append("<table><tr><th>Benutzername</th><th>Aktionen</th></tr>");
         for (Benutzer b : benutzer) {
             html.append("<tr><td>").append(b.getUsername()).append("</td><td>");
-
-            // Anpassen-Button
             html.append("<form style='display:inline;' method='get' action='/admin/logins/anpassen'>")
                 .append("<input type='hidden' name='username' value='").append(b.getUsername()).append("'>")
                 .append("<button type='submit'>Anpassen</button>")
                 .append("</form>");
-
-            // Löschen-Button
             html.append("<form style='display:inline;' method='post' action='/admin/logins/loeschen' onsubmit='return confirm(\"Benutzer wirklich löschen?\");'>")
                 .append("<input type='hidden' name='username' value='").append(b.getUsername()).append("'>")
                 .append("<button type='submit'>Löschen</button>")
                 .append("</form>");
-
             html.append("</td></tr>");
         }
         html.append("</table><br>");
-
         html.append("<h2>Neuen Benutzer hinzufügen</h2>");
         html.append("<form method='post' action='/admin/logins/add'>")
             .append("Benutzername: <input type='text' name='username' required><br>")
             .append("Passwort: <input type='password' name='passwort' required><br>")
             .append("<button type='submit'>Hinzufügen</button>")
             .append("</form>");
-
         html.append("<br><form method='get' action='/admin'><button type='submit'>Zurück</button></form>");
-
         html.append("</body></html>");
         return html.toString();
     }
@@ -86,21 +76,21 @@ public class AdminController {
 
     @GetMapping("/logins/anpassen")
     public String anpassenForm(@RequestParam String username) {
-        return """
-            <html><head><title>Benutzer anpassen</title><style>
-            body { text-align: center; font-family: Arial; }
-            input, button { font-size: 14px; padding: 4px; margin: 2px; }
-            </style></head><body>
-            <h1>Benutzer anpassen: """ + username + """</h1>
-            <form method='post' action='/admin/logins/anpassen'>
-                <input type='hidden' name='oldUsername' value='""" + username + """'>
-                Neuer Benutzername: <input type='text' name='newUsername' value='""" + username + """' required><br>
-                Neues Passwort: <input type='password' name='newPasswort' required><br>
-                <button type='submit'>Bestätigen</button>
-            </form>
-            <form method='get' action='/admin/logins'><button type='submit'>Abbrechen</button></form>
-            </body></html>
-        """;
+        StringBuilder html = new StringBuilder();
+        html.append("<html><head><title>Benutzer anpassen</title><style>")
+            .append("body { text-align: center; font-family: Arial; }")
+            .append("input, button { font-size: 14px; padding: 4px; margin: 2px; }")
+            .append("</style></head><body>");
+        html.append("<h1>Benutzer anpassen: ").append(username).append("</h1>");
+        html.append("<form method='post' action='/admin/logins/anpassen'>")
+            .append("<input type='hidden' name='oldUsername' value='").append(username).append("'>")
+            .append("Neuer Benutzername: <input type='text' name='newUsername' value='").append(username).append("' required><br>")
+            .append("Neues Passwort: <input type='password' name='newPasswort' required><br>")
+            .append("<button type='submit'>Bestätigen</button>")
+            .append("</form>");
+        html.append("<form method='get' action='/admin/logins'><button type='submit'>Abbrechen</button></form>");
+        html.append("</body></html>");
+        return html.toString();
     }
 
     @PostMapping("/logins/anpassen")
