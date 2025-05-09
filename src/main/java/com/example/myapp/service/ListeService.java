@@ -12,12 +12,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ListeService {
     private final BenutzerRepository benutzerRepo;
     private final BestellungRepository bestellungRepo;
-    private final ZoneId zone = ZoneId.of("Europe/Zurich");
+    private final ZoneId zone = ZoneId.of("Europe/Zurich"); // DE/CH Zeitzone
 
     public ListeService(BenutzerRepository benutzerRepo, BestellungRepository bestellungRepo) {
         this.benutzerRepo = benutzerRepo;
@@ -38,6 +39,10 @@ public class ListeService {
         return benutzerRepo.findAll();
     }
 
+    public List<String> getAlleBenutzerNamen() {
+        return benutzerRepo.findAll().stream().map(Benutzer::getUsername).collect(Collectors.toList());
+    }
+
     public List<Bestellung> getBestellungen(String benutzer) {
         return bestellungRepo.findByBenutzer(benutzer)
                 .stream()
@@ -45,7 +50,7 @@ public class ListeService {
                 .toList();
     }
 
-    public List<Bestellung> getAlleArchiviertenBestellungen() {
+    public List<Bestellung> getAlleArchiviertenBestellungenSorted() {
         return bestellungRepo.findAll()
                 .stream()
                 .filter(b -> "Archiviert".equals(b.getStatus()))
@@ -88,15 +93,60 @@ public class ListeService {
         }
     }
 
-    public boolean loescheBestellungWennMoeglich(Long id) {
-        Optional<Bestellung> opt = bestellungRepo.findById(id);
-        if (opt.isPresent()) {
-            Bestellung b = opt.get();
+    public void loescheBestellungWennMoeglich(Long id) {
+        bestellungRepo.findById(id).ifPresent(b -> {
             if ("in Bearbeitung".equals(b.getStatus()) && b.getEingabedatum() == null) {
-                bestellungRepo.deleteById(id);
-                return true;
+                bestellungRepo.delete(b);
             }
+        });
+    }
+
+    public String generiereBenutzerSeite(String benutzer) {
+        List<Bestellung> bestellungen = getBestellungen(benutzer).stream()
+            .sorted(Comparator
+                .comparing(Bestellung::getEingabedatum, Comparator.nullsLast(Comparator.naturalOrder()))
+                .thenComparing(Bestellung::getMaterial, Comparator.nullsLast(Comparator.naturalOrder())))
+            .toList();
+
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
+
+        StringBuilder html = new StringBuilder();
+        html.append("<html><head><title>Benutzer</title><style>")
+            .append("body { text-align: center; font-family: Arial; margin-top: 50px; }")
+            .append("input, button { font-size: 16px; margin: 5px; }")
+            .append("table { margin: auto; border-collapse: collapse; }")
+            .append("td, th { border: 1px solid black; padding: 5px; }")
+            .append("</style></head><body>")
+            .append("<h1>Willkommen, ").append(benutzer).append("!</h1>")
+            .append("<form action='/normalbenutzer/").append(benutzer).append("/bestellen' method='post'>")
+            .append("<input type='number' name='anzahl' min='1' placeholder='Anzahl' required>")
+            .append("<input type='text' name='material' placeholder='Material' required>")
+            .append("<button type='submit'>Bestätigen</button></form>")
+            .append("<h2>Bestellliste:</h2><table><tr><th>Anzahl</th><th>Material</th><th>Status</th><th>Eingabedatum</th><th>Rückgabedatum</th><th>Aktion</th></tr>");
+
+        for (Bestellung b : bestellungen) {
+            html.append("<tr><td>").append(b.getAnzahl()).append("</td><td>")
+                .append(b.getMaterial()).append("</td><td>")
+                .append(b.getStatus()).append("</td><td>")
+                .append(b.getEingabedatum() != null ? b.getEingabedatum().format(dtf) : "")
+                .append("</td><td>")
+                .append(b.getRueckgabedatum() != null ? b.getRueckgabedatum().format(dtf) : "")
+                .append("</td><td>");
+            if ("in Bearbeitung".equals(b.getStatus()) && b.getEingabedatum() == null) {
+                html.append("<form method='post' action='/normalbenutzer/").append(benutzer).append("/loeschen/").append(b.getId()).append("'>")
+                    .append("<button type='submit'>Löschen</button></form>");
+            }
+            html.append("</td></tr>");
         }
-        return false;
+
+        html.append("</table><br><form action='/normalbenutzer/").append(benutzer).append("/senden' method='post'>")
+            .append("<button type='submit'>An MatWart senden!</button></form>")
+            .append("<br><a href='/'>Logout</a></body></html>");
+
+        return html.toString();
+    }
+
+    public ZoneId getZone() {
+        return zone;
     }
 }
