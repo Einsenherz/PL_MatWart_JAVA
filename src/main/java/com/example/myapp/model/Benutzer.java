@@ -16,9 +16,19 @@ public class Benutzer {
         this.passwort = passwort;
     }
 
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    public String getUsername() {
+        return username;
+    }
 
-    public String getPasswort() { return passwort; }
-    public void setPasswort(String passwort) { this.passwort = passwort; }
+    public String getPasswort() {
+        return passwort;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPasswort(String passwort) {
+        this.passwort = passwort;
+    }
 }
