@@ -43,34 +43,60 @@ public class AdminController {
     }
 
     @GetMapping("/logins")
-    public String loginsPage(HttpSession session) {
-        if (!isAdmin(session)) return redirectToLogin();
-        StringBuilder html = new StringBuilder();
-        html.append("<html><head><title>Logins verwalten</title><style>")
-            .append("body { text-align: center; font-family: Arial; margin-top: 30px; }")
-            .append("input, button { font-size: 14px; margin: 5px; }")
-            .append("</style></head><body>")
-            .append("<h1>Benutzer-Logins</h1>");
+public String loginsPage(HttpSession session) {
+    if (!isAdmin(session)) return redirectToLogin();
+    
+    StringBuilder html = new StringBuilder();
+    html.append("<html><head><title>Logins verwalten</title><style>")
+        .append("body { text-align: center; font-family: Arial; margin-top: 30px; }")
+        .append("input, button { font-size: 14px; margin: 5px; }")
+        .append("</style>")
+        .append("<script>")
+        .append("function toggleEdit(id) {")
+        .append("  var nameField = document.getElementById('name-' + id);")
+        .append("  var passField = document.getElementById('pass-' + id);")
+        .append("  var btn = document.getElementById('btn-' + id);")
+        .append("  if (btn.textContent === 'Anpassen') {")
+        .append("    nameField.readOnly = false;")
+        .append("    passField.readOnly = false;")
+        .append("    btn.textContent = 'Bestätigen';")
+        .append("  } else {")
+        .append("    if (confirm('Änderungen übernehmen?')) {")
+        .append("      var form = document.getElementById('form-' + id);")
+        .append("      form.submit();")
+        .append("    } else {")
+        .append("      nameField.readOnly = true;")
+        .append("      passField.readOnly = true;")
+        .append("      btn.textContent = 'Anpassen';")
+        .append("    }")
+        .append("  }")
+        .append("}")
+        .append("</script></head><body>")
+        .append("<h1>Benutzer-Logins</h1>");
 
-        for (String benutzer : service.benutzerLogins.keySet()) {
-            String passwort = service.benutzerLogins.get(benutzer);
-            html.append("<form action='/admin/logins/update/" + benutzer + "' method='post'>")
-                .append("<input type='text' name='name' value='" + benutzer + "' readonly>")
-                .append("<input type='text' name='passwort' value='" + passwort + "' readonly>")
-                .append("<button type='submit' formaction='/admin/logins/edit/" + benutzer + "'>Anpassen</button>")
-                .append("<button type='submit' formaction='/admin/logins/delete/" + benutzer + "'>Löschen</button>")
-                .append("</form>");
-        }
-
-        html.append("<h2>Neues Login hinzufügen</h2>")
-            .append("<form action='/admin/logins/add' method='post'>")
-            .append("<input type='text' name='name' placeholder='Benutzername' required>")
-            .append("<input type='text' name='passwort' placeholder='Passwort' required>")
-            .append("<button type='submit'>Hinzufügen</button></form>")
-            .append("<br><a href='/admin'>Zurück</a></body></html>");
-
-        return html.toString();
+    for (String benutzer : service.benutzerLogins.keySet()) {
+        String passwort = service.benutzerLogins.get(benutzer);
+        html.append("<form id='form-").append(benutzer).append("' action='/admin/logins/update/")
+            .append(benutzer).append("' method='post'>")
+            .append("<input type='text' id='name-").append(benutzer)
+            .append("' name='name' value='").append(benutzer).append("' readonly>")
+            .append("<input type='text' id='pass-").append(benutzer)
+            .append("' name='passwort' value='").append(passwort).append("' readonly>")
+            .append("<button type='button' id='btn-").append(benutzer)
+            .append("' onclick='toggleEdit(\"").append(benutzer).append("\")'>Anpassen</button>")
+            .append("<button type='submit' formaction='/admin/logins/delete/").append(benutzer).append("'>Löschen</button>")
+            .append("</form>");
     }
+
+    html.append("<h2>Neues Login hinzufügen</h2>")
+        .append("<form action='/admin/logins/add' method='post'>")
+        .append("<input type='text' name='name' placeholder='Benutzername' required>")
+        .append("<input type='text' name='passwort' placeholder='Passwort' required>")
+        .append("<button type='submit'>Hinzufügen</button></form>")
+        .append("<br><a href='/admin'>Zurück</a></body></html>");
+
+    return html.toString();
+}
 
     @PostMapping("/logins/add")
     public String addLogin(@RequestParam String name, @RequestParam String passwort, HttpSession session) {
