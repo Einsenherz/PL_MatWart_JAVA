@@ -26,7 +26,6 @@ public class Bestellung {
         this.status = status;
     }
 
-    // Getter
     public Long getId() {
         return id;
     }
@@ -53,11 +52,6 @@ public class Bestellung {
 
     public LocalDateTime getRueckgabedatum() {
         return rueckgabedatum;
-    }
-
-    // Setter
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public void setBenutzer(String benutzer) {
