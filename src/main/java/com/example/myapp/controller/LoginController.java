@@ -4,7 +4,7 @@ import com.example.myapp.service.ListeService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
+@Controller
 public class LoginController {
     private final ListeService service;
     private final String ADMIN_PASS = "8500Dieros";
