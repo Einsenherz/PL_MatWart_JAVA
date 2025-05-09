@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class LoginController {
     private final ListeService service;
-    private final String ADMIN_PASS = "8500Dieros";
+    private final String ADMIN_PASS = "adminpass";
 
     public LoginController(ListeService service) {
         this.service = service;
@@ -35,7 +35,7 @@ public class LoginController {
         if ("admin".equals(username) && ADMIN_PASS.equals(password)) {
             session.setAttribute("loggedInUser", "admin");
             return "<script>window.location.href='/admin';</script>";
-        } else if (service.benutzerLogins.containsKey(username) && service.benutzerLogins.get(username).equals(password)) {
+        } else if (service.checkPasswort(username, password)) {
             session.setAttribute("loggedInUser", username);
             return "<script>window.location.href='/normalbenutzer/" + username + "';</script>";
         } else {
