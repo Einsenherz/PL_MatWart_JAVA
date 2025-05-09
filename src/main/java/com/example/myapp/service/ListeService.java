@@ -35,6 +35,13 @@ public class ListeService {
         benutzerRepo.save(new Benutzer(username, passwort));
     }
 
+    public void updateBenutzer(String oldUsername, String newUsername, String newPasswort) {
+    benutzerRepo.findById(oldUsername).ifPresent(b -> {
+        benutzerRepo.deleteById(oldUsername);
+        benutzerRepo.save(new Benutzer(newUsername, newPasswort));
+    });
+    }
+
     public List<Benutzer> getAlleBenutzer() {
         return benutzerRepo.findAll();
     }
