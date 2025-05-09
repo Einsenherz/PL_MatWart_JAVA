@@ -13,12 +13,6 @@ public class ListeService {
     public final Map<String, String> statusTexte = new HashMap<>();
 
     public ListeService() {
-        benutzerLogins.put("max", "1234");
-        benutzerLogins.put("anna", "5678");
-        bestellListen.put("max", new ArrayList<>());
-        bestellListen.put("anna", new ArrayList<>());
-        statusTexte.put("max", "");
-        statusTexte.put("anna", "");
     }
 
     public String generiereBenutzerSeite(String benutzer) {
