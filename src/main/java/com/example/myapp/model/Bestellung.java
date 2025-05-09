@@ -26,6 +26,61 @@ public class Bestellung {
         this.status = status;
     }
 
-    // Getters & Setters (wie schon bekannt)
-    // [hier wie im alten Code]
+    // Getter
+    public Long getId() {
+        return id;
+    }
+
+    public String getBenutzer() {
+        return benutzer;
+    }
+
+    public int getAnzahl() {
+        return anzahl;
+    }
+
+    public String getMaterial() {
+        return material;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public LocalDateTime getEingabedatum() {
+        return eingabedatum;
+    }
+
+    public LocalDateTime getRueckgabedatum() {
+        return rueckgabedatum;
+    }
+
+    // Setter
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setBenutzer(String benutzer) {
+        this.benutzer = benutzer;
+    }
+
+    public void setAnzahl(int anzahl) {
+        this.anzahl = anzahl;
+    }
+
+    public void setMaterial(String material) {
+        this.material = material;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setEingabedatum(LocalDateTime eingabedatum) {
+        this.eingabedatum = eingabedatum;
+    }
+
+    public void setRueckgabedatum(LocalDateTime rueckgabedatum) {
+        this.rueckgabedatum = rueckgabedatum;
+    }
 }
