@@ -83,7 +83,8 @@ public class AdminController {
 
     @GetMapping("/archiv")
     public String archivListe() {
-        List<Bestellung> archiv = service.getAlleArchiviertenBestellungen();
+        // ✅ hier der KORREKTE Methodennamen!
+        List<Bestellung> archiv = service.getAlleArchiviertenBestellungenSorted();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
         StringBuilder html = new StringBuilder();
