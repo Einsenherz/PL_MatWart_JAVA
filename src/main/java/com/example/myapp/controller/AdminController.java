@@ -189,4 +189,18 @@ public class AdminController {
         html.append("</body></html>");
         return html.toString();
     }
+
+        @PostMapping("/listen/status")
+    public String updateStatus(@RequestParam Long id, @RequestParam String status) {
+        service.updateStatusMitRueckgabe(id, status);
+        return "<script>window.location.href='/admin/listen';</script>";
+    }
+
+        @PostMapping("/listen/archivieren")
+    public String archivieren(@RequestParam Long id) {
+        service.updateStatusMitRueckgabe(id, "Archiviert");
+        return "<script>window.location.href='/admin/listen';</script>";
+    }
+
+
 }
