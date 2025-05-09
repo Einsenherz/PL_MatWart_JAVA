@@ -110,7 +110,9 @@ public class AdminController {
 
     @GetMapping("/listen")
     public String bestellListe() {
-        List<Bestellung> bestellungen = service.getAlleBestellungen();
+        List<Bestellung> bestellungen = service.getAlleBestellungen().stream()
+            .filter(b -> !"Archiviert".equals(b.getStatus()))
+            .toList();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
     
         StringBuilder html = new StringBuilder();
@@ -129,7 +131,6 @@ public class AdminController {
                 .append("<td>").append(b.getAnzahl()).append("</td>")
                 .append("<td>").append(b.getMaterial()).append("</td>");
     
-            // Dropdown-Formular für Status-Änderung
             html.append("<td>")
                 .append("<form method='post' action='/admin/listen/status'>")
                 .append("<input type='hidden' name='id' value='").append(b.getId()).append("'>")
@@ -145,7 +146,6 @@ public class AdminController {
             html.append("<td>").append(b.getEingabedatum() != null ? b.getEingabedatum().format(dtf) : "").append("</td>")
                 .append("<td>").append(b.getRueckgabedatum() != null ? b.getRueckgabedatum().format(dtf) : "").append("</td>");
     
-            // Archivieren-Button
             html.append("<td>")
                 .append("<form method='post' action='/admin/listen/archivieren'>")
                 .append("<input type='hidden' name='id' value='").append(b.getId()).append("'>")
@@ -161,6 +161,7 @@ public class AdminController {
         html.append("</body></html>");
         return html.toString();
     }
+
 
     @GetMapping("/archiv")
     public String archivListe() {
