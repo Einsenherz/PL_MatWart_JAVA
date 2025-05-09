@@ -4,6 +4,8 @@ import com.example.myapp.model.Bestellung;
 import com.example.myapp.service.ListeService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.format.DateTimeFormatter;
