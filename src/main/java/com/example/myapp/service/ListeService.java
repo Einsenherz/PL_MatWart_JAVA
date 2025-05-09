@@ -53,7 +53,7 @@ public class ListeService {
         bestellungRepo.findById(id).ifPresent(b -> {
             b.setStatus(status);
             if ("Archiviert".equals(status) && b.getRueckgabedatum() == null) {
-                b.setRueckgabedatum(LocalDateTime.now());
+                b.setRueckgabedatum(LocalDateTime.now(ZoneId.of("Europe/Berlin")));
             }
             bestellungRepo.save(b);
         });
@@ -68,7 +68,7 @@ public class ListeService {
         List<Bestellung> liste = bestellungRepo.findByBenutzer(benutzer);
         for (Bestellung b : liste) {
             if (b.getEingabedatum() == null) {
-                b.setEingabedatum(LocalDateTime.now());
+                b.setEingabedatum(LocalDateTime.now(ZoneId.of("Europe/Berlin")));
                 bestellungRepo.save(b);
             }
         }
