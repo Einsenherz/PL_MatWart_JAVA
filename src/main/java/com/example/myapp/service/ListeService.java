@@ -29,16 +29,22 @@ public class ListeService {
             .append("<input type='number' name='anzahl' min='1' placeholder='Anzahl' required>")
             .append("<input type='text' name='material' placeholder='Material' required>")
             .append("<button type='submit'>Bestätigen</button></form>")
-            .append("<h2>Bestellliste:</h2><table><tr><th>Anzahl</th><th>Material</th></tr>");
+            .append("<h2>Bestellliste:</h2><table><tr><th>Anzahl</th><th>Material</th><th>Status</th></tr>");
+        
         for (Bestellung b : bestellungen) {
-            html.append("<tr><td>").append(b.getAnzahl()).append("</td><td>").append(b.getMaterial()).append("</td></tr>");
+            html.append("<tr><td>").append(b.getAnzahl()).append("</td><td>")
+                .append(b.getMaterial()).append("</td><td>")
+                .append(b.getStatus()).append("</td></tr>");
         }
+        
         html.append("</table><br><form action='/normalbenutzer/").append(benutzer).append("/senden' method='post'>")
             .append("<button type='submit'>An MatWart senden!</button></form>");
+        
         String status = statusTexte.getOrDefault(benutzer, "");
         if (!status.isEmpty()) {
             html.append("<p>").append(status).append("</p>");
         }
+        
         html.append("<br><a href='/'>Logout</a></body></html>");
         return html.toString();
     }
@@ -52,3 +58,4 @@ public class ListeService {
         statusTexte.put(benutzer, zeitstempel + " - an MatWart abgegeben");
     }
 }
+
