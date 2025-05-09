@@ -4,12 +4,10 @@ import com.example.myapp.service.ListeService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Comparator;
-import java.time.LocalDateTime;
-
 @RestController
 @RequestMapping("/normalbenutzer")
 public class BenutzerController {
+
     private final ListeService service;
 
     public BenutzerController(ListeService service) {
@@ -22,7 +20,7 @@ public class BenutzerController {
         if (!benutzer.equals(loggedUser)) {
             return "<script>window.location.href='/'</script>";
         }
-        return service.generiereBenutzerSeite(benutzer);
+        return service.generiereBenutzerSeite(benutzer);  // Diese Methode gibt die sortierte Tabelle zurück
     }
 
     @PostMapping("/{benutzer}/bestellen")
@@ -45,4 +43,3 @@ public class BenutzerController {
         return "<script>window.location.href='/normalbenutzer/" + benutzer + "';</script>";
     }
 }
-
