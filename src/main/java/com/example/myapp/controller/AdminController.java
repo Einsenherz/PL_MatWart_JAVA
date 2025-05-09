@@ -134,7 +134,14 @@ public String loginsPage(HttpSession session) {
 
         for (Map.Entry<String, List<Bestellung>> entry : service.bestellListen.entrySet()) {
             String benutzer = entry.getKey();
-            List<Bestellung> liste = entry.getValue();
+            
+                   // SORTIERUNG:
+            List<Bestellung> liste = entry.getValue().stream()
+                .sorted(Comparator
+                .comparing(Bestellung::getEingabedatum, Comparator.nullsLast(Comparator.naturalOrder()))
+                .thenComparing(Bestellung::getMaterial, Comparator.nullsLast(Comparator.naturalOrder())))
+                .toList();
+            
             html.append("<h2>").append(benutzer).append("</h2>")
                 .append("<form action='/admin/listen/update/").append(benutzer).append("' method='post'>")
                 .append("<table><tr><th>Anzahl</th><th>Material</th><th>Status</th></tr>");
