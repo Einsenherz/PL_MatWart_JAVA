@@ -52,6 +52,17 @@ public class ListeService {
         bestellungRepo.findByBenutzer(username).forEach(b -> bestellungRepo.delete(b));
     }
 
+    public void markiereAlsAbgegeben(String benutzer) {
+    List<Bestellung> liste = bestellungRepo.findByBenutzer(benutzer);
+    for (Bestellung b : liste) {
+        if (b.getEingabedatum() == null) {  // nur beim ersten Mal
+            b.setEingabedatum(LocalDateTime.now());
+            bestellungRepo.save(b);
+            }
+        }    
+    }
+
+
     public String generiereBenutzerSeite(String benutzer) {
         List<Bestellung> bestellungen = getBestellungen(benutzer);
         StringBuilder html = new StringBuilder();
