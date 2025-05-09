@@ -2,6 +2,8 @@ package com.example.myapp.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 @Entity
 public class Bestellung {
