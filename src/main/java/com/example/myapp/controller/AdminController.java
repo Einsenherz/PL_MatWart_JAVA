@@ -147,5 +147,22 @@ public class AdminController {
         service.statusTexte.put(benutzer, zeitstempel + " - von MatWart gesehen");
         return "<script>window.location.href='/admin/listen';</script>";
     }
+    
+    @PostMapping("/logins/update/{oldBenutzer}")
+    public String updateLogin(@PathVariable String oldBenutzer, @RequestParam String name, @RequestParam String passwort, HttpSession session) {
+    if (!isAdmin(session)) return redirectToLogin();
+    
+    service.benutzerLogins.remove(oldBenutzer);
+    service.benutzerLogins.put(name, passwort);
+    
+    // optional: auch Bestelllisten und Status umbenennen
+    if (!oldBenutzer.equals(name)) {
+        service.bestellListen.put(name, service.bestellListen.remove(oldBenutzer));
+        service.statusTexte.put(name, service.statusTexte.remove(oldBenutzer));
+    }
+
+    return "<script>window.location.href='/admin/logins';</script>";
+    }
+
 }
 
