@@ -41,17 +41,26 @@ public class AdminController {
             .append("body { text-align: center; font-family: Arial; }")
             .append("table { margin: auto; border-collapse: collapse; }")
             .append("th, td { border: 1px solid black; padding: 5px; }")
-            .append("button { font-size: 14px; padding: 4px; }")
+            .append("button { font-size: 14px; padding: 4px; margin: 2px; }")
             .append("</style></head><body>");
-        
+
         html.append("<h1>Benutzerverwaltung</h1>");
         html.append("<table><tr><th>Benutzername</th><th>Aktionen</th></tr>");
         for (Benutzer b : benutzer) {
             html.append("<tr><td>").append(b.getUsername()).append("</td><td>");
+
+            // Anpassen-Button
             html.append("<form style='display:inline;' method='get' action='/admin/logins/anpassen'>")
                 .append("<input type='hidden' name='username' value='").append(b.getUsername()).append("'>")
                 .append("<button type='submit'>Anpassen</button>")
                 .append("</form>");
+
+            // Löschen-Button
+            html.append("<form style='display:inline;' method='post' action='/admin/logins/loeschen' onsubmit='return confirm(\"Benutzer wirklich löschen?\");'>")
+                .append("<input type='hidden' name='username' value='").append(b.getUsername()).append("'>")
+                .append("<button type='submit'>Löschen</button>")
+                .append("</form>");
+
             html.append("</td></tr>");
         }
         html.append("</table><br>");
@@ -63,9 +72,7 @@ public class AdminController {
             .append("<button type='submit'>Hinzufügen</button>")
             .append("</form>");
 
-        html.append("<br><form method='get' action='/admin'>")
-            .append("<button type='submit'>Zurück</button>")
-            .append("</form>");
+        html.append("<br><form method='get' action='/admin'><button type='submit'>Zurück</button></form>");
 
         html.append("</body></html>");
         return html.toString();
@@ -104,9 +111,15 @@ public class AdminController {
         return "<script>window.location.href='/admin/logins';</script>";
     }
 
+    @PostMapping("/logins/loeschen")
+    public String loescheBenutzer(@RequestParam String username) {
+        service.deleteBenutzer(username);
+        return "<script>window.location.href='/admin/logins';</script>";
+    }
+
     @GetMapping("/listen")
     public String bestellListe() {
-        List<Bestellung> bestellungen = service.getAlleBestellungen(); // alle Bestellungen
+        List<Bestellung> bestellungen = service.getAlleBestellungen();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
         StringBuilder html = new StringBuilder();
