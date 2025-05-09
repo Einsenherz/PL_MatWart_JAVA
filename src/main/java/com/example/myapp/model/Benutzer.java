@@ -1,25 +1,34 @@
 package com.example.myapp.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
-public class Benutzer {
+public class Bestellung {
     @Id
-    private String name;
-    private String passwort;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String benutzer;
+    private int anzahl;
+    private String material;
+    private String status;
 
-    public Benutzer() {}
+    public Bestellung() {}
 
-    public Benutzer(String name, String passwort) {
-        this.name = name;
-        this.passwort = passwort;
+    public Bestellung(String benutzer, int anzahl, String material, String status) {
+        this.benutzer = benutzer;
+        this.anzahl = anzahl;
+        this.material = material;
+        this.status = status;
     }
 
     // Getter + Setter
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-
-    public String getPasswort() { return passwort; }
-    public void setPasswort(String passwort) { this.passwort = passwort; }
+    public Long getId() { return id; }
+    public String getBenutzer() { return benutzer; }
+    public void setBenutzer(String benutzer) { this.benutzer = benutzer; }
+    public int getAnzahl() { return anzahl; }
+    public void setAnzahl(int anzahl) { this.anzahl = anzahl; }
+    public String getMaterial() { return material; }
+    public void setMaterial(String material) { this.material = material; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }
