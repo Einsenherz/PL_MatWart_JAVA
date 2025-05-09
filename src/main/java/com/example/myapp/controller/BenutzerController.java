@@ -1,5 +1,6 @@
 package com.example.myapp.controller;
 
+import com.example.myapp.model.Bestellung;
 import com.example.myapp.service.ListeService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.*;
@@ -7,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/normalbenutzer")
 public class BenutzerController {
-
     private final ListeService service;
 
     public BenutzerController(ListeService service) {
@@ -20,11 +20,14 @@ public class BenutzerController {
         if (!benutzer.equals(loggedUser)) {
             return "<script>window.location.href='/'</script>";
         }
-        return service.generiereBenutzerSeite(benutzer);  // Diese Methode gibt die sortierte Tabelle zurück
+        return service.generiereBenutzerSeite(benutzer);
     }
 
     @PostMapping("/{benutzer}/bestellen")
-    public String bestellung(@PathVariable String benutzer, @RequestParam int anzahl, @RequestParam String material, HttpSession session) {
+    public String bestellung(@PathVariable String benutzer,
+                             @RequestParam int anzahl,
+                             @RequestParam String material,
+                             HttpSession session) {
         String loggedUser = (String) session.getAttribute("loggedInUser");
         if (!benutzer.equals(loggedUser)) {
             return "<script>window.location.href='/'</script>";
@@ -40,6 +43,23 @@ public class BenutzerController {
             return "<script>window.location.href='/'</script>";
         }
         service.markiereAlsAbgegeben(benutzer);
+        return "<script>window.location.href='/normalbenutzer/" + benutzer + "';</script>";
+    }
+
+    @PostMapping("/{benutzer}/delete/{id}")
+    public String deleteBestellung(@PathVariable String benutzer,
+                                   @PathVariable Long id,
+                                   HttpSession session) {
+        String loggedUser = (String) session.getAttribute("loggedInUser");
+        if (!benutzer.equals(loggedUser)) {
+            return "<script>window.location.href='/'</script>";
+        }
+
+        Bestellung bestellung = service.findBestellungById(id);
+        if (bestellung != null && "in Bearbeitung".equals(bestellung.getStatus()) && bestellung.getEingabedatum() == null) {
+            service.deleteBestellung(bestellung);
+        }
+
         return "<script>window.location.href='/normalbenutzer/" + benutzer + "';</script>";
     }
 }
