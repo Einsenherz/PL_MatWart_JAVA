@@ -159,20 +159,25 @@ public String loginsPage(HttpSession session) {
         return html.toString();
     }
 
-    @PostMapping("/listen/update/{benutzer}")
-    public String updateListen(@PathVariable String benutzer, @RequestParam Map<String, String> allParams, HttpSession session) {
-        if (!isAdmin(session)) return redirectToLogin();
-        List<Bestellung> liste = service.bestellListen.get(benutzer);
-        for (int i = 0; i < liste.size(); i++) {
-            String statusKey = "status" + i;
-            if (allParams.containsKey(statusKey)) {
-                liste.get(i).setStatus(allParams.get(statusKey));
+@PostMapping("/listen/update/{benutzer}")
+public String updateListen(@PathVariable String benutzer, @RequestParam Map<String, String> allParams, HttpSession session) {
+    if (!isAdmin(session)) return redirectToLogin();
+    List<Bestellung> liste = service.getBestellungen(benutzer);
+    for (int i = 0; i < liste.size(); i++) {
+        String statusKey = "status" + i;
+        if (allParams.containsKey(statusKey)) {
+            Bestellung b = liste.get(i);
+            String neuerStatus = allParams.get(statusKey);
+            if (!b.getStatus().equals("Archiviert") && "Archiviert".equals(neuerStatus)) {
+                b.setRueckgabedatum(LocalDateTime.now());
             }
+            b.setStatus(neuerStatus);
+            service.saveBestellung(b);
         }
-        String zeitstempel = new SimpleDateFormat("HH:mm:ss - dd.MM.yyyy").format(new Date());
-        service.statusTexte.put(benutzer, zeitstempel + " - von MatWart gesehen");
-        return "<script>window.location.href='/admin/listen';</script>";
     }
+    service.updateStatusText(benutzer, LocalDateTime.now() + " - von MatWart gesehen");
+    return "<script>window.location.href='/admin/listen';</script>";
+}
     
     @PostMapping("/logins/update/{oldBenutzer}")
     public String updateLogin(@PathVariable String oldBenutzer, @RequestParam String name, @RequestParam String passwort, HttpSession session) {
@@ -189,6 +194,36 @@ public String loginsPage(HttpSession session) {
 
     return "<script>window.location.href='/admin/logins';</script>";
     }
+
+    @GetMapping("/archiv")
+public String archivPage(HttpSession session) {
+    if (!isAdmin(session)) return redirectToLogin();
+    StringBuilder html = new StringBuilder();
+    html.append("<html><head><title>Archiv</title><style>")
+        .append("body { font-family: Arial; } table { margin: auto; border-collapse: collapse; }")
+        .append("td, th { border: 1px solid black; padding: 5px; }")
+        .append("</style></head><body><h1>Archivierte Bestellungen</h1>");
+
+    List<Bestellung> alleArchiviert = service.getAlleBestellungen()
+        .stream()
+        .filter(b -> "Archiviert".equals(b.getStatus()))
+        .sorted(Comparator
+            .comparing(Bestellung::getEingabedatum, Comparator.nullsLast(Comparator.naturalOrder()))
+            .thenComparing(Bestellung::getMaterial, Comparator.nullsLast(Comparator.naturalOrder())))
+        .toList();
+
+    html.append("<table><tr><th>Benutzer</th><th>Anzahl</th><th>Material</th><th>Eingabedatum</th><th>Rückgabedatum</th></tr>");
+    for (Bestellung b : alleArchiviert) {
+        html.append("<tr><td>").append(b.getBenutzer()).append("</td><td>")
+            .append(b.getAnzahl()).append("</td><td>")
+            .append(b.getMaterial()).append("</td><td>")
+            .append(b.getEingabedatum() != null ? b.getEingabedatum() : "").append("</td><td>")
+            .append(b.getRueckgabedatum() != null ? b.getRueckgabedatum() : "").append("</td></tr>");
+    }
+    html.append("</table><br><a href='/admin'>Zurück</a></body></html>");
+    return html.toString();
+}
+
 
 }
 
