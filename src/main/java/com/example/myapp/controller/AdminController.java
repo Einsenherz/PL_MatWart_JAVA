@@ -19,17 +19,18 @@ public class AdminController {
 
     @GetMapping
     public String adminHome() {
-        StringBuilder html = new StringBuilder();
-        html.append("<html><head><title>Admin</title><style>")
-            .append("body { text-align: center; font-family: Arial; }")
-            .append("</style></head><body>");
-        html.append("<h1>Admin-Bereich</h1>");
-        html.append("<a href='/admin/logins'>Benutzerverwaltung</a><br>");
-        html.append("<a href='/admin/listen'>Bestellungen</a><br>");
-        html.append("<a href='/admin/archiv'>Archiv</a><br>");
-        html.append("<br><a href='/'>Logout</a>");
-        html.append("</body></html>");
-        return html.toString();
+        return """
+            <html><head><title>Admin</title><style>
+            body { text-align: center; font-family: Arial; }
+            button { font-size: 14px; padding: 5px; margin: 4px; }
+            </style></head><body>
+            <h1>Admin-Bereich</h1>
+            <form method='get' action='/admin/logins'><button type='submit'>Benutzerverwaltung</button></form>
+            <form method='get' action='/admin/listen'><button type='submit'>Bestellungen</button></form>
+            <form method='get' action='/admin/archiv'><button type='submit'>Archiv</button></form>
+            <form method='get' action='/'><button type='submit'>Logout</button></form>
+            </body></html>
+        """;
     }
 
     @GetMapping("/logins")
@@ -40,21 +41,72 @@ public class AdminController {
             .append("body { text-align: center; font-family: Arial; }")
             .append("table { margin: auto; border-collapse: collapse; }")
             .append("th, td { border: 1px solid black; padding: 5px; }")
+            .append("button { font-size: 14px; padding: 4px; }")
             .append("</style></head><body>");
+        
         html.append("<h1>Benutzerverwaltung</h1>");
-        html.append("<table><tr><th>Benutzername</th></tr>");
+        html.append("<table><tr><th>Benutzername</th><th>Aktionen</th></tr>");
         for (Benutzer b : benutzer) {
-            html.append("<tr><td>").append(b.getUsername()).append("</td></tr>");
+            html.append("<tr><td>").append(b.getUsername()).append("</td><td>");
+            html.append("<form style='display:inline;' method='get' action='/admin/logins/anpassen'>")
+                .append("<input type='hidden' name='username' value='").append(b.getUsername()).append("'>")
+                .append("<button type='submit'>Anpassen</button>")
+                .append("</form>");
+            html.append("</td></tr>");
         }
-        html.append("</table>");
-        html.append("<br><a href='/admin'>Zurück</a>");
+        html.append("</table><br>");
+
+        html.append("<h2>Neuen Benutzer hinzufügen</h2>");
+        html.append("<form method='post' action='/admin/logins/add'>")
+            .append("Benutzername: <input type='text' name='username' required><br>")
+            .append("Passwort: <input type='password' name='passwort' required><br>")
+            .append("<button type='submit'>Hinzufügen</button>")
+            .append("</form>");
+
+        html.append("<br><form method='get' action='/admin'>")
+            .append("<button type='submit'>Zurück</button>")
+            .append("</form>");
+
         html.append("</body></html>");
         return html.toString();
     }
 
+    @PostMapping("/logins/add")
+    public String addBenutzer(@RequestParam String username, @RequestParam String passwort) {
+        service.addBenutzer(username, passwort);
+        return "<script>window.location.href='/admin/logins';</script>";
+    }
+
+    @GetMapping("/logins/anpassen")
+    public String anpassenForm(@RequestParam String username) {
+        return """
+            <html><head><title>Benutzer anpassen</title><style>
+            body { text-align: center; font-family: Arial; }
+            input, button { font-size: 14px; padding: 4px; margin: 2px; }
+            </style></head><body>
+            <h1>Benutzer anpassen: """ + username + """</h1>
+            <form method='post' action='/admin/logins/anpassen'>
+                <input type='hidden' name='oldUsername' value='""" + username + """'>
+                Neuer Benutzername: <input type='text' name='newUsername' value='""" + username + """' required><br>
+                Neues Passwort: <input type='password' name='newPasswort' required><br>
+                <button type='submit'>Bestätigen</button>
+            </form>
+            <form method='get' action='/admin/logins'><button type='submit'>Abbrechen</button></form>
+            </body></html>
+        """;
+    }
+
+    @PostMapping("/logins/anpassen")
+    public String updateBenutzer(@RequestParam String oldUsername,
+                                 @RequestParam String newUsername,
+                                 @RequestParam String newPasswort) {
+        service.updateBenutzer(oldUsername, newUsername, newPasswort);
+        return "<script>window.location.href='/admin/logins';</script>";
+    }
+
     @GetMapping("/listen")
     public String bestellListe() {
-        List<Bestellung> bestellungen = service.getBestellungen(""); // alle Bestellungen
+        List<Bestellung> bestellungen = service.getAlleBestellungen(); // alle Bestellungen
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
         StringBuilder html = new StringBuilder();
@@ -76,14 +128,13 @@ public class AdminController {
                 .append("</tr>");
         }
         html.append("</table>");
-        html.append("<br><a href='/admin'>Zurück</a>");
+        html.append("<br><form method='get' action='/admin'><button type='submit'>Zurück</button></form>");
         html.append("</body></html>");
         return html.toString();
     }
 
     @GetMapping("/archiv")
     public String archivListe() {
-        // ✅ hier der KORREKTE Methodennamen!
         List<Bestellung> archiv = service.getAlleArchiviertenBestellungenSorted();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
@@ -105,7 +156,7 @@ public class AdminController {
                 .append("</tr>");
         }
         html.append("</table>");
-        html.append("<br><a href='/admin'>Zurück</a>");
+        html.append("<br><form method='get' action='/admin'><button type='submit'>Zurück</button></form>");
         html.append("</body></html>");
         return html.toString();
     }
