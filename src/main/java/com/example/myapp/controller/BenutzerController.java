@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-@RestController
+@Controller
 @RequestMapping("/normalbenutzer")
 public class BenutzerController {
     private final ListeService service;
