@@ -41,11 +41,12 @@ public class AdminController {
             .append("th, td { border: 1px solid black; padding: 5px; }")
             .append("button { font-size: 14px; padding: 4px; margin: 2px; }")
             .append("</style></head><body>");
-
+    
         html.append("<h1>Benutzerverwaltung</h1>");
-        html.append("<table><tr><th>Benutzername</th><th>Aktionen</th></tr>");
+        html.append("<table><tr><th>Benutzername</th><th>Passwort</th><th>Aktionen</th></tr>");
         for (Benutzer b : benutzer) {
-            html.append("<tr><td>").append(b.getUsername()).append("</td><td>");
+            html.append("<tr><td>").append(b.getUsername()).append("</td>");
+            html.append("<td>").append(b.getPasswort()).append("</td><td>");
             html.append("<form style='display:inline;' method='get' action='/admin/logins/anpassen'>")
                 .append("<input type='hidden' name='username' value='").append(b.getUsername()).append("'>")
                 .append("<button type='submit'>Anpassen</button>")
