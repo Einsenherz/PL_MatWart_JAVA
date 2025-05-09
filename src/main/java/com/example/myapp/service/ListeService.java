@@ -117,6 +117,18 @@ public class ListeService {
         }
     }
 
+    // Bestellung nur löschen, wenn Status "in Bearbeitung" und kein Eingabedatum gesetzt
+    public boolean loescheBestellungWennMoeglich(Long id) {
+        return bestellungRepo.findById(id).map(b -> {
+            if ("in Bearbeitung".equals(b.getStatus()) && b.getEingabedatum() == null) {
+                bestellungRepo.delete(b);
+                return true;
+            }
+            return false;
+        }).orElse(false);
+    }
+
+
     public ZoneId getZone() {
         return zone;
     }
