@@ -202,7 +202,7 @@ public String updateListen(@PathVariable String benutzer, @RequestParam Map<Stri
     return "<script>window.location.href='/admin/logins';</script>";
     }
 
-    @GetMapping("/archiv")
+@GetMapping("/archiv")
 public String archivPage(HttpSession session) {
     if (!isAdmin(session)) return redirectToLogin();
     StringBuilder html = new StringBuilder();
@@ -211,8 +211,8 @@ public String archivPage(HttpSession session) {
         .append("td, th { border: 1px solid black; padding: 5px; }")
         .append("</style></head><body><h1>Archivierte Bestellungen</h1>");
 
-    List<Bestellung> alleArchiviert = service.getAlleBestellungen()
-        .stream()
+    // SORTIERUNG:
+    List<Bestellung> alleArchiviert = service.getAlleBestellungen().stream()
         .filter(b -> "Archiviert".equals(b.getStatus()))
         .sorted(Comparator
             .comparing(Bestellung::getEingabedatum, Comparator.nullsLast(Comparator.naturalOrder()))
@@ -230,7 +230,6 @@ public String archivPage(HttpSession session) {
     html.append("</table><br><a href='/admin'>Zurück</a></body></html>");
     return html.toString();
 }
-
 
 }
 
