@@ -2,13 +2,9 @@ package com.example.myapp.controller;
 
 import com.example.myapp.service.ListeService;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-
-
-@Controller
+@RestController  // WICHTIG: @RestController statt @Controller für direkte String-Rückgabe
 public class LoginController {
     private final ListeService service;
     private final String ADMIN_PASS = "8500Dieros";
@@ -38,18 +34,23 @@ public class LoginController {
     public String login(@RequestParam String username, @RequestParam String password, HttpSession session) {
         if ("admin".equals(username) && ADMIN_PASS.equals(password)) {
             session.setAttribute("loggedInUser", "admin");
-            return "<script>window.location.href='/admin';</script>";
+            return "<meta http-equiv='refresh' content='0; URL=/admin'>";
         } else if (service.checkPasswort(username, password)) {
             session.setAttribute("loggedInUser", username);
-            return "<script>window.location.href='/normalbenutzer/" + username + "';</script>";
+            return "<meta http-equiv='refresh' content='0; URL=/normalbenutzer/" + username + "'>";
         } else {
-            return "<p>Falsches Passwort! <a href='/'>Zurück</a></p>";
+            return """
+                <html><head><title>Login fehlgeschlagen</title></head><body>
+                <p>Falsches Passwort!</p>
+                <a href='/'>Zurück zum Login</a>
+                </body></html>
+            """;
         }
     }
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "<script>window.location.href='/'</script>";
+        return "<meta http-equiv='refresh' content='0; URL=/'>";
     }
 }
