@@ -2,6 +2,7 @@ package com.example.myapp.controller;
 
 import com.example.myapp.model.Bestellung;
 import com.example.myapp.service.ListeService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
@@ -18,22 +19,32 @@ public class AdminController {
         this.service = service;
     }
 
+    private boolean isAdmin(HttpSession session) {
+        return "admin".equals(session.getAttribute("loggedInUser"));
+    }
+
+    private String redirectToLogin() {
+        return "<script>window.location.href='/'</script>";
+    }
+
     @GetMapping("")
-    public String adminPage() {
+    public String adminPage(HttpSession session) {
+        if (!isAdmin(session)) return redirectToLogin();
         return """
             <html><head><title>Admin</title><style>
             body { text-align: center; font-family: Arial; margin-top: 50px; }
             button { font-size: 16px; margin: 10px; }
             </style></head><body>
             <h1>Admin-Bereich</h1>
-            <button onclick=\"window.location.href='/admin/logins'\">Logins</button>
-            <button onclick=\"window.location.href='/admin/listen'\">Listen</button>
+            <button onclick="window.location.href='/admin/logins'">Logins</button>
+            <button onclick="window.location.href='/admin/listen'">Listen</button>
             <br><a href='/'>Logout</a>
             </body></html>""";
     }
 
     @GetMapping("/logins")
-    public String loginsPage() {
+    public String loginsPage(HttpSession session) {
+        if (!isAdmin(session)) return redirectToLogin();
         StringBuilder html = new StringBuilder();
         html.append("<html><head><title>Logins verwalten</title><style>")
             .append("body { text-align: center; font-family: Arial; margin-top: 30px; }")
@@ -62,7 +73,8 @@ public class AdminController {
     }
 
     @PostMapping("/logins/add")
-    public String addLogin(@RequestParam String name, @RequestParam String passwort) {
+    public String addLogin(@RequestParam String name, @RequestParam String passwort, HttpSession session) {
+        if (!isAdmin(session)) return redirectToLogin();
         service.benutzerLogins.put(name, passwort);
         service.bestellListen.put(name, new java.util.ArrayList<>());
         service.statusTexte.put(name, "");
@@ -70,7 +82,8 @@ public class AdminController {
     }
 
     @PostMapping("/logins/delete/{benutzer}")
-    public String deleteLogin(@PathVariable String benutzer) {
+    public String deleteLogin(@PathVariable String benutzer, HttpSession session) {
+        if (!isAdmin(session)) return redirectToLogin();
         service.benutzerLogins.remove(benutzer);
         service.bestellListen.remove(benutzer);
         service.statusTexte.remove(benutzer);
@@ -78,12 +91,14 @@ public class AdminController {
     }
 
     @PostMapping("/logins/edit/{benutzer}")
-    public String editLogin(@PathVariable String benutzer) {
+    public String editLogin(@PathVariable String benutzer, HttpSession session) {
+        if (!isAdmin(session)) return redirectToLogin();
         return "<script>alert('Bearbeiten aktiv - bitte Textfelder ändern und erneut bestätigen. Funktionalität kann erweitert werden.'); window.location.href='/admin/logins';</script>";
     }
 
     @GetMapping("/listen")
-    public String listenPage() {
+    public String listenPage(HttpSession session) {
+        if (!isAdmin(session)) return redirectToLogin();
         StringBuilder html = new StringBuilder();
         html.append("<html><head><title>Bestelllisten</title><style>")
             .append("body { font-family: Arial; }")
@@ -119,7 +134,8 @@ public class AdminController {
     }
 
     @PostMapping("/listen/update/{benutzer}")
-    public String updateListen(@PathVariable String benutzer, @RequestParam Map<String, String> allParams) {
+    public String updateListen(@PathVariable String benutzer, @RequestParam Map<String, String> allParams, HttpSession session) {
+        if (!isAdmin(session)) return redirectToLogin();
         List<Bestellung> liste = service.bestellListen.get(benutzer);
         for (int i = 0; i < liste.size(); i++) {
             String statusKey = "status" + i;
@@ -132,3 +148,4 @@ public class AdminController {
         return "<script>window.location.href='/admin/listen';</script>";
     }
 }
+
