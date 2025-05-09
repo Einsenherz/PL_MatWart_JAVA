@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class LoginController {
     private final ListeService service;
-    private final String ADMIN_PASS = "adminpass";
+    private final String ADMIN_PASS = "8500Dieros";
 
     public LoginController(ListeService service) {
         this.service = service;
