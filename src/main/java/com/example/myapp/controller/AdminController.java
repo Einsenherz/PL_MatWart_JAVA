@@ -112,25 +112,50 @@ public class AdminController {
     public String bestellListe() {
         List<Bestellung> bestellungen = service.getAlleBestellungen();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
-
+    
         StringBuilder html = new StringBuilder();
         html.append("<html><head><title>Bestellungen</title><style>")
             .append("body { text-align: center; font-family: Arial; }")
             .append("table { margin: auto; border-collapse: collapse; }")
             .append("th, td { border: 1px solid black; padding: 5px; }")
             .append("</style></head><body>");
+    
         html.append("<h1>Bestellungen</h1>");
-        html.append("<table><tr><th>Benutzer</th><th>Anzahl</th><th>Material</th><th>Status</th><th>Eingabedatum</th><th>Rückgabedatum</th></tr>");
+        html.append("<table><tr><th>Benutzer</th><th>Anzahl</th><th>Material</th><th>Status</th><th>Eingabedatum</th><th>Rückgabedatum</th><th>Aktionen</th></tr>");
+        
         for (Bestellung b : bestellungen) {
             html.append("<tr>")
                 .append("<td>").append(b.getBenutzer()).append("</td>")
                 .append("<td>").append(b.getAnzahl()).append("</td>")
-                .append("<td>").append(b.getMaterial()).append("</td>")
-                .append("<td>").append(b.getStatus()).append("</td>")
-                .append("<td>").append(b.getEingabedatum() != null ? b.getEingabedatum().format(dtf) : "").append("</td>")
-                .append("<td>").append(b.getRueckgabedatum() != null ? b.getRueckgabedatum().format(dtf) : "").append("</td>")
-                .append("</tr>");
+                .append("<td>").append(b.getMaterial()).append("</td>");
+    
+            // Dropdown-Formular für Status-Änderung
+            html.append("<td>")
+                .append("<form method='post' action='/admin/listen/status'>")
+                .append("<input type='hidden' name='id' value='").append(b.getId()).append("'>")
+                .append("<select name='status'>")
+                .append("<option value='in Bearbeitung'").append("in Bearbeitung".equals(b.getStatus()) ? " selected" : "").append(">in Bearbeitung</option>")
+                .append("<option value='Bestätigt'").append("Bestätigt".equals(b.getStatus()) ? " selected" : "").append(">Bestätigt</option>")
+                .append("<option value='Rückgabe fällig'").append("Rückgabe fällig".equals(b.getStatus()) ? " selected" : "").append(">Rückgabe fällig</option>")
+                .append("</select>")
+                .append("<button type='submit'>Ändern</button>")
+                .append("</form>")
+                .append("</td>");
+    
+            html.append("<td>").append(b.getEingabedatum() != null ? b.getEingabedatum().format(dtf) : "").append("</td>")
+                .append("<td>").append(b.getRueckgabedatum() != null ? b.getRueckgabedatum().format(dtf) : "").append("</td>");
+    
+            // Archivieren-Button
+            html.append("<td>")
+                .append("<form method='post' action='/admin/listen/archivieren'>")
+                .append("<input type='hidden' name='id' value='").append(b.getId()).append("'>")
+                .append("<button type='submit'>Archivieren</button>")
+                .append("</form>")
+                .append("</td>");
+    
+            html.append("</tr>");
         }
+    
         html.append("</table>");
         html.append("<br><form method='get' action='/admin'><button type='submit'>Zurück</button></form>");
         html.append("</body></html>");
