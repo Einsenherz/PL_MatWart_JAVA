@@ -128,6 +128,13 @@ public class ListeService {
         }).orElse(false);
     }
 
+        public void leereArchiv() {
+        List<Bestellung> archiv = bestellungRepo.findAll()
+            .stream()
+            .filter(b -> "Archiviert".equals(b.getStatus()))
+            .toList();
+        bestellungRepo.deleteAll(archiv);
+    }
 
     public ZoneId getZone() {
         return zone;
