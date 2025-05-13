@@ -191,6 +191,32 @@ public class AdminController {
         return html.toString();
     }
 
+        @GetMapping("/archiv/export")
+    public ResponseEntity<byte[]> exportiereArchivAlsCsv() {
+        List<Bestellung> archiv = service.getAlleArchiviertenBestellungenSorted();
+        StringBuilder csv = new StringBuilder("Benutzer,Anzahl,Material,Eingabedatum,Rueckgabedatum\n");
+        for (Bestellung b : archiv) {
+            csv.append(b.getBenutzer()).append(',')
+               .append(b.getAnzahl()).append(',')
+               .append(b.getMaterial()).append(',')
+               .append(b.getEingabedatum() != null ? b.getEingabedatum() : "").append(',')
+               .append(b.getRueckgabedatum() != null ? b.getRueckgabedatum() : "")
+               .append('\n');
+        }
+    
+        byte[] csvBytes = csv.toString().getBytes(StandardCharsets.UTF_8);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=archiv.csv")
+                .contentType(MediaType.TEXT_PLAIN)
+                .body(csvBytes);
+    }
+    
+    @PostMapping("/archiv/clear")
+    public String archivLeeren() {
+        service.leereArchiv();
+        return "<script>window.location.href='/admin/archiv';</script>";
+    }
+
         @PostMapping("/listen/status")
     public String updateStatus(@RequestParam Long id, @RequestParam String status) {
         service.updateStatusMitRueckgabe(id, status);
