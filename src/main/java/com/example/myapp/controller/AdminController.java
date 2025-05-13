@@ -162,18 +162,18 @@ public class AdminController {
         return html.toString();
     }
 
-
     @GetMapping("/archiv")
     public String archivListe() {
         List<Bestellung> archiv = service.getAlleArchiviertenBestellungenSorted();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
-
+    
         StringBuilder html = new StringBuilder();
         html.append("<html><head><title>Archiv</title><style>")
             .append("body { text-align: center; font-family: Arial; }")
             .append("table { margin: auto; border-collapse: collapse; }")
             .append("th, td { border: 1px solid black; padding: 5px; }")
             .append("</style></head><body>");
+    
         html.append("<h1>Archiv</h1>");
         html.append("<table><tr><th>Benutzer</th><th>Anzahl</th><th>Material</th><th>Eingabedatum</th><th>Rückgabedatum</th></tr>");
         for (Bestellung b : archiv) {
@@ -185,11 +185,22 @@ public class AdminController {
                 .append("<td>").append(b.getRueckgabedatum() != null ? b.getRueckgabedatum().format(dtf) : "").append("</td>")
                 .append("</tr>");
         }
-        html.append("</table>");
+        html.append("</table><br>");
+    
+        // Hier kommen die Buttons für Export und Leeren
+        html.append("<form method='get' action='/admin/archiv/export' style='display:inline;'>")
+            .append("<button type='submit'>📁 Archiv exportieren</button>")
+            .append("</form>");
+        html.append("<form method='post' action='/admin/archiv/clear' style='display:inline;' onsubmit='return confirm(\"Wirklich alle archivierten Einträge löschen?\");'>")
+            .append("<button type='submit'>🗑️ Archiv leeren</button>")
+            .append("</form>");
+    
         html.append("<br><form method='get' action='/admin'><button type='submit'>Zurück</button></form>");
         html.append("</body></html>");
+    
         return html.toString();
     }
+
 
         @GetMapping("/archiv/export")
     public ResponseEntity<byte[]> exportiereArchivAlsCsv() {
