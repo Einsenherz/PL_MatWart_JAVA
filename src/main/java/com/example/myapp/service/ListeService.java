@@ -29,6 +29,14 @@ public class ListeService {
         this.materialRepository = materialRepository;
     }
 
+    // ===== ADMIN-Benutzer =====
+    @PostConstruct
+    public void initAdminUser() {
+        if (benutzerRepository.findByUsername("admin") == null) {
+            benutzerRepository.save(new Benutzer("admin", "Dieros8500"));
+        }
+    }
+
     // ===== Benutzer (ohne Admin in DB) =====
     public List<Benutzer> getAlleBenutzer() {
         // Admin wird nicht mit aufgelistet
