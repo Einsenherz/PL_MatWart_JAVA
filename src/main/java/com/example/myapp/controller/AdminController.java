@@ -16,19 +16,27 @@ import java.util.List;
 @RestController
 @RequestMapping("/admin")
 public class AdminController {
+
     private final ListeService service;
 
     public AdminController(ListeService service) {
         this.service = service;
     }
 
+    // Hilfsmethode für einheitlichen HTML-Header
+    private String htmlHead(String title) {
+        return "<html><head><meta charset='UTF-8'><title>" + title + "</title>"
+             + "<link rel='stylesheet' href='/style.css'>"
+             + "</head><body>"
+             + "<header>"
+             + "<img src='/images/Logo_Pfadi_Panthera_Leo.png' alt='Logo' style='height:80px;'>"
+             + "<h1>" + title + "</h1>"
+             + "</header>";
+    }
+
     @GetMapping
     public String adminHome() {
-        return "<html><head><title>Admin</title><style>"
-                + "body { text-align: center; font-family: Arial; }"
-                + "button { font-size: 14px; padding: 5px; margin: 4px; }"
-                + "</style></head><body>"
-                + "<h1>Admin-Bereich</h1>"
+        return htmlHead("Admin-Bereich")
                 + "<form method='get' action='/admin/logins'><button type='submit'>Benutzerverwaltung</button></form>"
                 + "<form method='get' action='/admin/listen'><button type='submit'>Bestellungen</button></form>"
                 + "<form method='get' action='/admin/archiv'><button type='submit'>Archiv</button></form>"
@@ -40,27 +48,20 @@ public class AdminController {
     public String benutzerListe() {
         List<Benutzer> benutzer = service.getAlleBenutzer();
         StringBuilder html = new StringBuilder();
-        html.append("<html><head><title>Benutzerverwaltung</title><style>")
-            .append("body { text-align: center; font-family: Arial; }")
-            .append("table { margin: auto; border-collapse: collapse; }")
-            .append("th, td { border: 1px solid black; padding: 5px; }")
-            .append("button { font-size: 14px; padding: 4px; margin: 2px; }")
-            .append("</style></head><body>");
-    
-        html.append("<h1>Benutzerverwaltung</h1>");
+        html.append(htmlHead("Benutzerverwaltung"));
         html.append("<table><tr><th>Benutzername</th><th>Passwort</th><th>Aktionen</th></tr>");
         for (Benutzer b : benutzer) {
-            html.append("<tr><td>").append(b.getUsername()).append("</td>");
-            html.append("<td>").append(b.getPasswort()).append("</td><td>");
-            html.append("<form style='display:inline;' method='get' action='/admin/logins/anpassen'>")
+            html.append("<tr><td>").append(b.getUsername()).append("</td>")
+                .append("<td>").append(b.getPasswort()).append("</td><td>")
+                .append("<form style='display:inline;' method='get' action='/admin/logins/anpassen'>")
                 .append("<input type='hidden' name='username' value='").append(b.getUsername()).append("'>")
                 .append("<button type='submit'>Anpassen</button>")
-                .append("</form>");
-            html.append("<form style='display:inline;' method='post' action='/admin/logins/loeschen' onsubmit='return confirm(\"Benutzer wirklich löschen?\");'>")
+                .append("</form>")
+                .append("<form style='display:inline;' method='post' action='/admin/logins/loeschen' onsubmit='return confirm(\"Benutzer wirklich löschen?\");'>")
                 .append("<input type='hidden' name='username' value='").append(b.getUsername()).append("'>")
                 .append("<button type='submit'>Löschen</button>")
-                .append("</form>");
-            html.append("</td></tr>");
+                .append("</form>")
+                .append("</td></tr>");
         }
         html.append("</table><br>");
         html.append("<h2>Neuen Benutzer hinzufügen</h2>");
@@ -83,10 +84,7 @@ public class AdminController {
     @GetMapping("/logins/anpassen")
     public String anpassenForm(@RequestParam String username) {
         StringBuilder html = new StringBuilder();
-        html.append("<html><head><title>Benutzer anpassen</title><style>")
-            .append("body { text-align: center; font-family: Arial; }")
-            .append("input, button { font-size: 14px; padding: 4px; margin: 2px; }")
-            .append("</style></head><body>");
+        html.append(htmlHead("Benutzer anpassen"));
         html.append("<h1>Benutzer anpassen: ").append(username).append("</h1>");
         html.append("<form method='post' action='/admin/logins/anpassen'>")
             .append("<input type='hidden' name='oldUsername' value='").append(username).append("'>")
@@ -119,24 +117,16 @@ public class AdminController {
             .filter(b -> !"Archiviert".equals(b.getStatus()))
             .toList();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
-    
+
         StringBuilder html = new StringBuilder();
-        html.append("<html><head><title>Bestellungen</title><style>")
-            .append("body { text-align: center; font-family: Arial; }")
-            .append("table { margin: auto; border-collapse: collapse; }")
-            .append("th, td { border: 1px solid black; padding: 5px; }")
-            .append("</style></head><body>");
-    
-        html.append("<h1>Bestellungen</h1>");
+        html.append(htmlHead("Bestellungen"));
         html.append("<table><tr><th>Benutzer</th><th>Anzahl</th><th>Material</th><th>Status</th><th>Eingabedatum</th><th>Rückgabedatum</th><th>Aktionen</th></tr>");
-        
         for (Bestellung b : bestellungen) {
             html.append("<tr>")
                 .append("<td>").append(b.getBenutzer()).append("</td>")
                 .append("<td>").append(b.getAnzahl()).append("</td>")
-                .append("<td>").append(b.getMaterial()).append("</td>");
-    
-            html.append("<td>")
+                .append("<td>").append(b.getMaterial()).append("</td>")
+                .append("<td>")
                 .append("<form method='post' action='/admin/listen/status'>")
                 .append("<input type='hidden' name='id' value='").append(b.getId()).append("'>")
                 .append("<select name='status'>")
@@ -146,21 +136,17 @@ public class AdminController {
                 .append("</select>")
                 .append("<button type='submit'>Ändern</button>")
                 .append("</form>")
-                .append("</td>");
-    
-            html.append("<td>").append(b.getEingabedatum() != null ? b.getEingabedatum().format(dtf) : "").append("</td>")
-                .append("<td>").append(b.getRueckgabedatum() != null ? b.getRueckgabedatum().format(dtf) : "").append("</td>");
-    
-            html.append("<td>")
+                .append("</td>")
+                .append("<td>").append(b.getEingabedatum() != null ? b.getEingabedatum().format(dtf) : "").append("</td>")
+                .append("<td>").append(b.getRueckgabedatum() != null ? b.getRueckgabedatum().format(dtf) : "").append("</td>")
+                .append("<td>")
                 .append("<form method='post' action='/admin/listen/archivieren'>")
                 .append("<input type='hidden' name='id' value='").append(b.getId()).append("'>")
                 .append("<button type='submit'>Archivieren</button>")
                 .append("</form>")
-                .append("</td>");
-    
-            html.append("</tr>");
+                .append("</td>")
+                .append("</tr>");
         }
-    
         html.append("</table>");
         html.append("<br><form method='get' action='/admin'><button type='submit'>Zurück</button></form>");
         html.append("</body></html>");
@@ -171,15 +157,9 @@ public class AdminController {
     public String archivListe() {
         List<Bestellung> archiv = service.getAlleArchiviertenBestellungenSorted();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
-    
+
         StringBuilder html = new StringBuilder();
-        html.append("<html><head><title>Archiv</title><style>")
-            .append("body { text-align: center; font-family: Arial; }")
-            .append("table { margin: auto; border-collapse: collapse; }")
-            .append("th, td { border: 1px solid black; padding: 5px; }")
-            .append("</style></head><body>");
-    
-        html.append("<h1>Archiv</h1>");
+        html.append(htmlHead("Archiv"));
         html.append("<table><tr><th>Benutzer</th><th>Anzahl</th><th>Material</th><th>Eingabedatum</th><th>Rückgabedatum</th></tr>");
         for (Bestellung b : archiv) {
             html.append("<tr>")
@@ -191,23 +171,14 @@ public class AdminController {
                 .append("</tr>");
         }
         html.append("</table><br>");
-    
-        // Hier kommen die Buttons für Export und Leeren
-        html.append("<form method='get' action='/admin/archiv/export' style='display:inline;'>")
-            .append("<button type='submit'>📁 Archiv exportieren</button>")
-            .append("</form>");
-        html.append("<form method='post' action='/admin/archiv/clear' style='display:inline;' onsubmit='return confirm(\"Wirklich alle archivierten Einträge löschen?\");'>")
-            .append("<button type='submit'>🗑️ Archiv leeren</button>")
-            .append("</form>");
-    
+        html.append("<form method='get' action='/admin/archiv/export' style='display:inline;'><button type='submit'>📁 Archiv exportieren</button></form>");
+        html.append("<form method='post' action='/admin/archiv/clear' style='display:inline;' onsubmit='return confirm(\"Wirklich alle archivierten Einträge löschen?\");'><button type='submit'>🗑️ Archiv leeren</button></form>");
         html.append("<br><form method='get' action='/admin'><button type='submit'>Zurück</button></form>");
         html.append("</body></html>");
-    
         return html.toString();
     }
 
-
-        @GetMapping("/archiv/export")
+    @GetMapping("/archiv/export")
     public ResponseEntity<byte[]> exportiereArchivAlsCsv() {
         List<Bestellung> archiv = service.getAlleArchiviertenBestellungenSorted();
         StringBuilder csv = new StringBuilder("Benutzer,Anzahl,Material,Eingabedatum,Rueckgabedatum\n");
@@ -219,31 +190,28 @@ public class AdminController {
                .append(b.getRueckgabedatum() != null ? b.getRueckgabedatum() : "")
                .append('\n');
         }
-    
         byte[] csvBytes = csv.toString().getBytes(StandardCharsets.UTF_8);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=archiv.csv")
                 .contentType(MediaType.TEXT_PLAIN)
                 .body(csvBytes);
     }
-    
+
     @PostMapping("/archiv/clear")
     public String archivLeeren() {
         service.leereArchiv();
         return "<script>window.location.href='/admin/archiv';</script>";
     }
 
-        @PostMapping("/listen/status")
+    @PostMapping("/listen/status")
     public String updateStatus(@RequestParam Long id, @RequestParam String status) {
         service.updateStatusMitRueckgabe(id, status);
         return "<script>window.location.href='/admin/listen';</script>";
     }
 
-        @PostMapping("/listen/archivieren")
+    @PostMapping("/listen/archivieren")
     public String archivieren(@RequestParam Long id) {
         service.updateStatusMitRueckgabe(id, "Archiviert");
         return "<script>window.location.href='/admin/listen';</script>";
     }
-
-
 }
