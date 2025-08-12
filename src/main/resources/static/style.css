@@ -1,10 +1,26 @@
 body {
     background-color: #f0f8ff; /* hellblau */
     font-family: Arial, sans-serif;
+    margin: 0;
 }
 
 header {
     background-color: #004080; /* dunkelblau */
     color: white;
     padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+header img {
+    height: 80px;
+}
+
+#mitteilung {
+    background-color: #fffae6;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 20px;
+    border-radius: 5px;
 }
