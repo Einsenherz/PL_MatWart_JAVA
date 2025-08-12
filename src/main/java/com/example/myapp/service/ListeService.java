@@ -53,6 +53,19 @@ public class ListeService {
         if (b != null) benutzerRepository.delete(b);
     }
 
+     // ===== Login =====
+    public String checkLogin(String username, String passwort) {
+        Benutzer benutzer = benutzerRepository.findByUsername(username);
+        if (benutzer != null && benutzer.getPasswort().equals(passwort)) {
+            if ("admin".equalsIgnoreCase(username)) {
+                return "admin";
+            } else {
+                return "benutzer";
+            }
+        }
+        return null;
+    }
+
     // ===== Bestellungen =====
     public List<Bestellung> getAlleBestellungen() {
         return bestellungRepository.findAll();
