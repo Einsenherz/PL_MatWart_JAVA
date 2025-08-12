@@ -10,10 +10,21 @@ import java.util.List;
 @RestController
 @RequestMapping("/normalbenutzer")
 public class BenutzerController {
+
     private final ListeService service;
 
     public BenutzerController(ListeService service) {
         this.service = service;
+    }
+
+    private String htmlHead(String title) {
+        return "<html><head><meta charset='UTF-8'><title>" + title + "</title>"
+             + "<link rel='stylesheet' href='/style.css'>"
+             + "</head><body>"
+             + "<header>"
+             + "<img src='/images/Logo_Pfadi_Panthera_Leo.png' alt='Logo' style='height:80px;'>"
+             + "<h1>" + title + "</h1>"
+             + "</header>";
     }
 
     @GetMapping("/{benutzer}")
@@ -22,12 +33,7 @@ public class BenutzerController {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
         StringBuilder html = new StringBuilder();
-        html.append("<html><head><title>Benutzerseite</title><style>")
-            .append("body { text-align: center; font-family: Arial; }")
-            .append("table { margin: auto; border-collapse: collapse; }")
-            .append("th, td { border: 1px solid black; padding: 5px; }")
-            .append("</style></head><body>");
-        html.append("<h1>Willkommen, ").append(benutzer).append("</h1>");
+        html.append(htmlHead("Willkommen, " + benutzer));
         html.append("<form action='/normalbenutzer/").append(benutzer).append("/bestellen' method='post'>")
             .append("Anzahl: <input name='anzahl' type='number' required> ")
             .append("Material: <input name='material' required> ")
