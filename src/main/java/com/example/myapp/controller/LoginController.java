@@ -52,10 +52,3 @@ public class LoginController {
             return "<script>alert('Ungültige Login-Daten!');window.location.href='/';</script>";
         }
     }
-
-    @GetMapping("/logout")
-    public String logout(HttpSession session) {
-        if (session != null) session.invalidate();
-        return "<script>window.location.href='/';</script>";
-    }
-}
