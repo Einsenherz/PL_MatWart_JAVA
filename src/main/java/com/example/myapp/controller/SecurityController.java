@@ -7,11 +7,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
-/**
- * Sichert automatisch Admin- und Benutzer-Routen.
- * Prüft die Session und lässt statische Ressourcen IMMER durch.
- */
 @Component
 public class SecurityController implements HandlerInterceptor, WebMvcConfigurer {
 
@@ -38,6 +35,11 @@ public class SecurityController implements HandlerInterceptor, WebMvcConfigurer 
             return false;
         }
 
+        //statische Dateien alle durchwinken
+        if (handler instanceof ResourceHttpRequestHandler) {
+    return true; // CSS, JS, Bilder immer erlauben
+}
+
         // Alles andere (Startseite, Login, statische Ressourcen, h2-console, Fehlerseiten) ist frei
         return true;
     }
@@ -50,14 +52,8 @@ public class SecurityController implements HandlerInterceptor, WebMvcConfigurer 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(this)
-        .addPathPatterns("/admin/**", "/benutzer/**")
-        .excludePathPatterns(
-            "/", "/login", "/logout", "/error",
-            "/style.css", "/script.js",
-            "/images/**", "/css/**", "/js/**", "/webjars/**",
-            "/h2-console/**", "/favicon.ico"
-        );
+            .addPathPatterns("/admin/**", "/benutzer/**")
+            .excludePathPatterns("/", "/login", "/logout", "/error", "/h2-console/**");
 }
-
 }
 
