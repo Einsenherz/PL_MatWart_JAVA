@@ -6,9 +6,10 @@ import com.example.myapp.model.Material;
 import com.example.myapp.repository.BenutzerRepository;
 import com.example.myapp.repository.BestellungRepository;
 import com.example.myapp.repository.MaterialRepository;
+
 import jakarta.annotation.PostConstruct;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -105,14 +106,24 @@ public class ListeService {
             b.setStatus(status);
             bestellungRepository.save(b);
 
-            // Bestände nur anpassen, wenn auf "Archiviert" gesetzt wird (egal welche Schreibweise)
-            if ("archiviert".equalsIgnoreCase(status)) {
+            // Bestände nur anpassen, wenn auf "Archiviert" gesetzt wird
+            if ("Archiviert".equals(status)) {
                 Material m = materialRepository.findByName(b.getMaterial());
                 if (m != null) {
                     m.setBestand(Math.max(0, m.getBestand() - b.getAnzahl()));
                     materialRepository.save(m);
                 }
             }
+        }
+    }
+
+    // ===== Neue Methode: Status ändern ohne Bestand zu ändern =====
+    @Transactional
+    public void updateStatusOhneBestand(Long id, String status) {
+        Bestellung b = bestellungRepository.findById(id).orElse(null);
+        if (b != null) {
+            b.setStatus(status);
+            bestellungRepository.save(b);
         }
     }
 
