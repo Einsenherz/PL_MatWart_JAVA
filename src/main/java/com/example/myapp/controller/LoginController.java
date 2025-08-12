@@ -1,6 +1,7 @@
 package com.example.myapp.controller;
 
 import com.example.myapp.service.ListeService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -35,14 +36,24 @@ public class LoginController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestParam String username, @RequestParam String passwort) {
+    public String login(@RequestParam String username, @RequestParam String passwort, HttpSession session) {
         String rolle = service.checkLogin(username, passwort);
-        if ("admin".equalsIgnoreCase(rolle)) {
-            return "<script>window.location.href='/admin';</script>";
-        } else if ("benutzer".equalsIgnoreCase(rolle)) {
-            return "<script>window.location.href='/benutzer';</script>";
+        if (rolle != null) {
+            // Speichert den eingeloggten Benutzer in der Session
+            session.setAttribute("username", username);
+            if ("admin".equalsIgnoreCase(rolle)) {
+                return "<script>window.location.href='/admin';</script>";
+            } else {
+                return "<script>window.location.href='/benutzer';</script>";
+            }
         } else {
             return "<script>alert('Ungültige Login-Daten!');window.location.href='/';</script>";
         }
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "<script>alert('Erfolgreich ausgeloggt!');window.location.href='/';</script>";
     }
 }
