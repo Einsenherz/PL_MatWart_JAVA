@@ -9,6 +9,10 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
+/**
+ * Sichert /admin/** und /benutzer/** über Session-Attribut "role".
+ * Lässt statische Ressourcen & Login/Logout frei.
+ */
 @Component
 public class SecurityController implements HandlerInterceptor, WebMvcConfigurer {
 
@@ -16,6 +20,11 @@ public class SecurityController implements HandlerInterceptor, WebMvcConfigurer 
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         final String uri = request.getRequestURI();
         final HttpSession session = request.getSession(false);
+
+        // Statische Dateien IMMER erlauben
+        if (handler instanceof ResourceHttpRequestHandler) {
+            return true;
+        }
 
         // Admin-Bereich absichern
         if (uri.startsWith("/admin")) {
@@ -28,21 +37,14 @@ public class SecurityController implements HandlerInterceptor, WebMvcConfigurer 
 
         // Benutzer-Bereich absichern
         if (uri.startsWith("/benutzer")) {
-            if (session != null && (
-                    "benutzer".equals(session.getAttribute("role")) ||
-                    "admin".equals(session.getAttribute("role")))) { // Admin darf auch Benutzerbereich sehen
+            if (session != null && "benutzer".equals(session.getAttribute("role"))) {
                 return true;
             }
             redirectLogin(response, "Bitte zuerst einloggen!");
             return false;
         }
 
-        // statische Dateien (CSS, JS, Bilder) immer erlauben
-        if (handler instanceof ResourceHttpRequestHandler) {
-            return true;
-        }
-
-        // Alles andere (Startseite, Login, Fehlerseiten) ist frei
+        // Alles andere (Startseite, Login/Logout, Fehler) ist frei
         return true;
     }
 
