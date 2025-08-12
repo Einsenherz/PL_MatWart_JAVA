@@ -2,7 +2,7 @@ package com.example.myapp.controller;
 
 /**
  * Gemeinsame HTML-Helfer für alle Seiten (Header mit Logo, Footer, Breadcrumb).
- * Controller können diese Klasse einfach "extends"en und die Methoden nutzen.
+ * Controller können diese Klasse "extends"en und die Methoden nutzen.
  */
 public abstract class BasePageController {
 
