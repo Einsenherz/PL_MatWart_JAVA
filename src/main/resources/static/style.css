@@ -1,6 +1,6 @@
 /* === Grundlayout === */
 body {
-    background-color: #f0f8ff; /* hellblau */
+    background-color: #f3e2a9; /* Beiger Hauptbereich */
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
@@ -9,7 +9,7 @@ body {
 
 /* === Kopfbereich === */
 header {
-    background-color: #004080; /* dunkelblau */
+    background-color: #703520; /* dunkelbraun */
     color: white;
     padding: 15px;
     display: flex;
@@ -66,7 +66,7 @@ tr:nth-child(even) {
 
 /* === Buttons allgemein === */
 button, input[type="submit"], .btn {
-    background-color: #004080;
+    background-color: #814000;
     color: white;
     border: none;
     padding: 10px 16px;
