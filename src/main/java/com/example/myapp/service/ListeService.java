@@ -31,6 +31,13 @@ public class ListeService {
     }
 
     // ===== Benutzer =====
+    @PostConstruct
+    public void initAdminUser() {
+        if (benutzerRepository.findByUsername("admin") == null) {
+            benutzerRepository.save(new Benutzer("admin", "Dieros8500"));
+        }
+    }
+    
     public List<Benutzer> getAlleBenutzer() {
         return benutzerRepository.findAll();
     }
