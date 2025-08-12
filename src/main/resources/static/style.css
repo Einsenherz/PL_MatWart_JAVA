@@ -40,12 +40,10 @@ table {
 }
 
 th {
-    background-color: #814000;
+    background-color: #814000; /* neu: gleiche Farbe wie Buttons */
     color: white;
     padding: 10px;
     text-align: left;
-    cursor: pointer;
-    user-select: none;
 }
 
 td {
