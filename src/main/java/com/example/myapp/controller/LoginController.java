@@ -36,20 +36,20 @@ public class LoginController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestParam String username, @RequestParam String passwort, HttpSession session) {
-        String rolle = service.checkLogin(username, passwort);
-        if (rolle != null) {
-            // Speichert den eingeloggten Benutzer in der Session
-            session.setAttribute("username", username);
-            if ("admin".equalsIgnoreCase(rolle)) {
-                return "<script>window.location.href='/admin';</script>";
-            } else {
-                return "<script>window.location.href='/benutzer';</script>";
-            }
+public String login(@RequestParam String username, @RequestParam String passwort, HttpSession session) {
+    String rolle = service.checkLogin(username, passwort);
+    if (rolle != null) {
+        session.setAttribute("username", username);
+        session.setAttribute("rolle", rolle);
+        if ("admin".equals(rolle)) {
+            return "<script>window.location.href='/admin';</script>";
         } else {
-            return "<script>alert('Ungültige Login-Daten!');window.location.href='/';</script>";
+            return "<script>window.location.href='/benutzer';</script>";
         }
+    } else {
+        return "<script>alert('Ungültige Login-Daten!');window.location.href='/';</script>";
     }
+}
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {
