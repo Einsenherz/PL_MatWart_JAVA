@@ -3,9 +3,9 @@ package com.example.myapp.controller;
 import com.example.myapp.model.Bestellung;
 import com.example.myapp.model.Material;
 import com.example.myapp.service.ListeService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpSession;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -24,20 +24,37 @@ public class BenutzerController {
     }
 
     @GetMapping
-    public String benutzerHome() {
-        return "<html><head><title>Benutzerbereich</title><link rel='stylesheet' href='/style.css'><script src='/script.js'></script></head><body>"
-                + "<header><h1>Benutzerbereich</h1></header>"
+    public String benutzerHome(HttpSession session) {
+        String benutzer = (String) session.getAttribute("username");
+        if (benutzer == null) {
+            return "<script>alert('Bitte zuerst einloggen!');window.location.href='/';</script>";
+        }
+
+        return "<html><head><title>Benutzerbereich</title>"
+                + "<link rel='stylesheet' href='/style.css'>"
+                + "<script src='/script.js'></script>"
+                + "</head><body>"
+                + "<header><h1>Willkommen, " + benutzer + "</h1></header>"
                 + "<main class='centered-content'>"
                 + "<form method='get' action='/benutzer/bestellen'><button type='submit'>Material bestellen</button></form>"
                 + "<form method='get' action='/benutzer/meine-bestellungen'><button type='submit'>Meine Bestellungen</button></form>"
-                + "<form method='get' action='/'><button class='btn-back' type='submit'>Logout</button></form>"
-                + "</main>" + breadcrumb("Benutzerbereich") + "</body></html>";
+                + "<form method='get' action='/logout'><button class='btn-back' type='submit'>Logout</button></form>"
+                + "</main>"
+                + breadcrumb("Benutzerbereich")
+                + "</body></html>";
     }
 
     @GetMapping("/bestellen")
-    public String bestellenForm() {
+    public String bestellenForm(HttpSession session) {
+        String benutzer = (String) session.getAttribute("username");
+        if (benutzer == null) {
+            return "<script>alert('Bitte zuerst einloggen!');window.location.href='/';</script>";
+        }
+
         List<Material> materialien = service.getAlleMaterialien();
-        StringBuilder html = new StringBuilder("<html><head><title>Material bestellen</title><link rel='stylesheet' href='/style.css'></head><body>");
+        StringBuilder html = new StringBuilder("<html><head><title>Material bestellen</title>"
+                + "<link rel='stylesheet' href='/style.css'>"
+                + "</head><body>");
         html.append("<header><h1>Material bestellen</h1></header><main class='centered-content'>");
         html.append("<form class='styled-form' method='post' action='/benutzer/bestellen'>");
         html.append("<label>Material:</label> <select name='material'>");
@@ -74,10 +91,13 @@ public class BenutzerController {
         List<Bestellung> bestellungen = service.getMeineBestellungen(benutzer);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
-        StringBuilder html = new StringBuilder("<html><head><title>Meine Bestellungen</title><link rel='stylesheet' href='/style.css'><script src='/script.js'></script></head><body>");
+        StringBuilder html = new StringBuilder("<html><head><title>Meine Bestellungen</title>"
+                + "<link rel='stylesheet' href='/style.css'>"
+                + "<script src='/script.js'></script></head><body>");
         html.append("<header><h1>Meine Bestellungen</h1></header><main>");
         html.append("<input type='text' class='table-filter' placeholder='Suche Bestellungen...' data-table='meineBestellungenTabelle'>");
-        html.append("<table id='meineBestellungenTabelle'><thead><tr><th>Material</th><th>Anzahl</th><th>Status</th><th>Eingabedatum</th></tr></thead><tbody>");
+        html.append("<table id='meineBestellungenTabelle'><thead><tr>"
+                + "<th>Material</th><th>Anzahl</th><th>Status</th><th>Eingabedatum</th></tr></thead><tbody>");
         for (Bestellung b : bestellungen) {
             html.append("<tr>")
                 .append("<td>").append(b.getMaterial()).append("</td>")
