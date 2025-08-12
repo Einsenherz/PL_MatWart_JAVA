@@ -76,25 +76,24 @@ public class ListeService {
         bestellung.setEingabedatum(LocalDateTime.now());
         bestellungRepository.save(bestellung);
     }
-
+    
     @Transactional
     public void updateStatusMitBestand(Long id, String status) {
-        Bestellung b = bestellungRepository.findById(id).orElse(null);
-        if (b != null) {
-            String alterStatus = b.getStatus();
-            b.setStatus(status);
-            bestellungRepository.save(b);
+    Bestellung b = bestellungRepository.findById(id).orElse(null);
+    if (b != null) {
+        b.setStatus(status);
+        bestellungRepository.save(b);
 
-            // Bestände anpassen nur bei Archivierung
-            if ("Archiviert".equals(status) && "Rückgabe fällig".equals(alterStatus)) {
-                Material m = materialRepository.findByName(b.getMaterial());
-                if (m != null) {
-                    m.setBestand(m.getBestand() + b.getAnzahl());
-                    materialRepository.save(m);
-                }
+        // Bestände nur anpassen, wenn auf "Archiviert" gesetzt wird
+        if ("Archiviert".equals(status)) {
+            Material m = materialRepository.findByName(b.getMaterial());
+            if (m != null) {
+                m.setBestand(Math.max(0, m.getBestand() - b.getAnzahl()));
+                materialRepository.save(m);
             }
         }
     }
+}
 
     public void leereArchiv() {
         List<Bestellung> archiv = getAlleArchiviertenBestellungenSorted();
