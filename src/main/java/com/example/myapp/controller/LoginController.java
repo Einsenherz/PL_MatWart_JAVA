@@ -36,14 +36,13 @@ public class LoginController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestParam String username, 
-                        @RequestParam String passwort, 
+    public String login(@RequestParam String username,
+                        @RequestParam String passwort,
                         HttpSession session) {
-
-        String role = service.checkLogin(username, passwort); // einheitlich "role"
+        String role = service.checkLogin(username, passwort);
         if (role != null) {
             session.setAttribute("username", username);
-            session.setAttribute("role", role); // einheitlich "role"
+            session.setAttribute("role", role); // <- wichtig: "role"
             if ("admin".equals(role)) {
                 return "<script>window.location.href='/admin';</script>";
             } else {
@@ -52,5 +51,11 @@ public class LoginController {
         } else {
             return "<script>alert('Ungültige Login-Daten!');window.location.href='/';</script>";
         }
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        if (session != null) session.invalidate();
+        return "<script>window.location.href='/';</script>";
     }
 }
