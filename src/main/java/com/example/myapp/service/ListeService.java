@@ -62,27 +62,37 @@ public class ListeService {
         return bestellungRepository.findByStatusOrderByEingabedatumDesc("Archiviert");
     }
 
+    public List<Bestellung> getMeineBestellungen(String benutzername) {
+        return bestellungRepository.findByBenutzerOrderByEingabedatumDesc(benutzername);
+    }
+
     @Transactional
-    public void updateStatusMitBestand(Long id, String neuerStatus) {
+    public void addBestellung(String benutzer, String materialName, int anzahl) {
+        Bestellung bestellung = new Bestellung();
+        bestellung.setBenutzer(benutzer);
+        bestellung.setMaterial(materialName);
+        bestellung.setAnzahl(anzahl);
+        bestellung.setStatus("in Bearbeitung");
+        bestellung.setEingabedatum(LocalDateTime.now());
+        bestellungRepository.save(bestellung);
+    }
+
+    @Transactional
+    public void updateStatusMitBestand(Long id, String status) {
         Bestellung b = bestellungRepository.findById(id).orElse(null);
         if (b != null) {
             String alterStatus = b.getStatus();
+            b.setStatus(status);
+            bestellungRepository.save(b);
 
-            // Status setzen
-            b.setStatus(neuerStatus);
-
-            // Wenn Archiviert => Bestand erhöhen & Rueckgabedatum setzen
-            if ("Archiviert".equals(neuerStatus) && !"Archiviert".equals(alterStatus)) {
+            // Bestände anpassen nur bei Archivierung
+            if ("Archiviert".equals(status) && "Rückgabe fällig".equals(alterStatus)) {
                 Material m = materialRepository.findByName(b.getMaterial());
                 if (m != null) {
                     m.setBestand(m.getBestand() + b.getAnzahl());
                     materialRepository.save(m);
                 }
-                b.setRueckgabedatum(LocalDateTime.now());
             }
-
-            // Keine Bestandsänderung bei "Rückgabe fällig" oder "Bestätigt"
-            bestellungRepository.save(b);
         }
     }
 
@@ -105,7 +115,6 @@ public class ListeService {
     @PostConstruct
     public void initInventar() {
         if (materialRepository.count() == 0) {
-            // Beispiel-Startdaten
             materialRepository.save(new Material("Hammer", 10));
             materialRepository.save(new Material("Schraubenzieher", 15));
             materialRepository.save(new Material("Bohrmaschine", 5));
