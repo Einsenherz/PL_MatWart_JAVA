@@ -4,8 +4,9 @@ import com.example.myapp.service.ListeService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.*;
 
-@RestController  // WICHTIG: @RestController statt @Controller für direkte String-Rückgabe
+@RestController
 public class LoginController {
+
     private final ListeService service;
     private final String ADMIN_PASS = "8500Dieros";
 
@@ -13,21 +14,25 @@ public class LoginController {
         this.service = service;
     }
 
+    private String htmlHead(String title) {
+        return "<html><head><meta charset='UTF-8'><title>" + title + "</title>"
+             + "<link rel='stylesheet' href='/style.css'>"
+             + "</head><body>"
+             + "<header>"
+             + "<img src='/images/Logo_Pfadi_Panthera_Leo.png' alt='Logo' style='height:80px;'>"
+             + "<h1>" + title + "</h1>"
+             + "</header>";
+    }
+
     @GetMapping("/")
     public String loginPage() {
-        return """
-            <html><head><title>Login</title><style>
-            body { text-align: center; margin-top: 100px; font-family: Arial; }
-            input, button { font-size: 16px; margin: 5px; }
-            </style></head><body>
-            <h1>Panthera Leo MatWart Login</h1>
-            <form method='post' action='/login'>
-                <input type='text' name='username' placeholder='Benutzername' required><br><br>
-                <input type='password' name='password' placeholder='Passwort' required><br><br>
-                <button type='submit'>Bestätigen</button>
-            </form>
-            </body></html>
-        """;
+        return htmlHead("Panthera Leo MatWart Login")
+            + "<form method='post' action='/login'>"
+            + "<input type='text' name='username' placeholder='Benutzername' required><br><br>"
+            + "<input type='password' name='password' placeholder='Passwort' required><br><br>"
+            + "<button type='submit'>Bestätigen</button>"
+            + "</form>"
+            + "</body></html>";
     }
 
     @PostMapping("/login")
@@ -39,12 +44,10 @@ public class LoginController {
             session.setAttribute("loggedInUser", username);
             return "<meta http-equiv='refresh' content='0; URL=/normalbenutzer/" + username + "'>";
         } else {
-            return """
-                <html><head><title>Login fehlgeschlagen</title></head><body>
-                <p>Falsches Passwort!</p>
-                <a href='/'>Zurück zum Login</a>
-                </body></html>
-            """;
+            return htmlHead("Login fehlgeschlagen")
+                + "<p>Falsches Passwort!</p>"
+                + "<a href='/'>Zurück zum Login</a>"
+                + "</body></html>";
         }
     }
 
