@@ -306,17 +306,18 @@ public class AdminController {
             return ResponseEntity.status(500).body(null);
         }
     }
-
-    // ===== Status/Archiv inkl. Bestandsanpassung =====
+    
     @PostMapping("/listen/status")
     public String updateStatus(@RequestParam Long id, @RequestParam String status) {
+        // Hier wird jetzt nur der Status gesetzt, Bestandsänderung erfolgt nur wenn "Archiviert"
         service.updateStatusMitBestand(id, status);
         return "<script>window.location.href='/admin/listen';</script>";
-    }
-
+}
+    
     @PostMapping("/listen/archivieren")
     public String archivieren(@RequestParam Long id) {
+        // Setzt den Status auf Archiviert und reduziert den Bestand
         service.updateStatusMitBestand(id, "Archiviert");
         return "<script>window.location.href='/admin/listen';</script>";
-    }
 }
+    
