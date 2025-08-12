@@ -26,9 +26,6 @@ public class BenutzerController {
     @GetMapping
     public String benutzerHome(HttpSession session) {
         String benutzer = (String) session.getAttribute("username");
-        if (benutzer == null) {
-            return "<script>alert('Bitte zuerst einloggen!');window.location.href='/';</script>";
-        }
 
         return "<html><head><title>Benutzerbereich</title>"
                 + "<link rel='stylesheet' href='/style.css'>"
@@ -46,12 +43,8 @@ public class BenutzerController {
 
     @GetMapping("/bestellen")
     public String bestellenForm(HttpSession session) {
-        String benutzer = (String) session.getAttribute("username");
-        if (benutzer == null) {
-            return "<script>alert('Bitte zuerst einloggen!');window.location.href='/';</script>";
-        }
-
         List<Material> materialien = service.getAlleMaterialien();
+
         StringBuilder html = new StringBuilder("<html><head><title>Material bestellen</title>"
                 + "<link rel='stylesheet' href='/style.css'>"
                 + "</head><body>");
@@ -74,9 +67,6 @@ public class BenutzerController {
     @PostMapping("/bestellen")
     public String bestellen(@RequestParam String material, @RequestParam int anzahl, HttpSession session) {
         String benutzer = (String) session.getAttribute("username");
-        if (benutzer == null) {
-            return "<script>alert('Bitte zuerst einloggen!');window.location.href='/';</script>";
-        }
         service.addBestellung(benutzer, material, anzahl);
         return "<script>window.location.href='/benutzer/meine-bestellungen';</script>";
     }
@@ -84,10 +74,6 @@ public class BenutzerController {
     @GetMapping("/meine-bestellungen")
     public String meineBestellungen(HttpSession session) {
         String benutzer = (String) session.getAttribute("username");
-        if (benutzer == null) {
-            return "<script>alert('Bitte zuerst einloggen!');window.location.href='/';</script>";
-        }
-
         List<Bestellung> bestellungen = service.getMeineBestellungen(benutzer);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
