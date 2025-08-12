@@ -12,16 +12,26 @@ public class LoginController {
         this.service = service;
     }
 
+    private String breadcrumb(String path) {
+        return "<div class='breadcrumb'><a href='/'>Home</a> > " + path + "</div>";
+    }
+
     @GetMapping("/")
     public String loginForm() {
-        return "<html><head><title>Login</title><link rel='stylesheet' href='/style.css'></head><body>"
-                + "<header><h1>Login</h1></header><main>"
-                + "<form method='post' action='/login'>"
-                + "Benutzername: <input type='text' name='username' required><br>"
-                + "Passwort: <input type='password' name='passwort' required><br>"
+        return "<html><head><title>Login</title>"
+                + "<link rel='stylesheet' href='/style.css'>"
+                + "<script src='/script.js'></script>"
+                + "</head><body>"
+                + "<header><h1>Login</h1></header>"
+                + "<main class='centered-content'>"
+                + "<form method='post' action='/login' class='styled-form'>"
+                + "<label>Benutzername:</label> <input type='text' name='username' required><br>"
+                + "<label>Passwort:</label> <input type='password' name='passwort' required><br><br>"
                 + "<button type='submit'>Anmelden</button>"
                 + "</form>"
-                + "</main></body></html>";
+                + "</main>"
+                + breadcrumb("Login")
+                + "</body></html>";
     }
 
     @PostMapping("/login")
