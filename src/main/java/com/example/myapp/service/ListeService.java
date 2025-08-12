@@ -2,141 +2,115 @@ package com.example.myapp.service;
 
 import com.example.myapp.model.Benutzer;
 import com.example.myapp.model.Bestellung;
+import com.example.myapp.model.Material;
 import com.example.myapp.repository.BenutzerRepository;
 import com.example.myapp.repository.BestellungRepository;
-import org.springframework.stereotype.Service;
+import com.example.myapp.repository.MaterialRepository;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Comparator;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import jakarta.annotation.PostConstruct;
+
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ListeService {
-    private final BenutzerRepository benutzerRepo;
-    private final BestellungRepository bestellungRepo;
-    private final ZoneId zone = ZoneId.of("Europe/Zurich"); // Zeitzone
 
-    public ListeService(BenutzerRepository benutzerRepo, BestellungRepository bestellungRepo) {
-        this.benutzerRepo = benutzerRepo;
-        this.bestellungRepo = bestellungRepo;
+    private final BenutzerRepository benutzerRepository;
+    private final BestellungRepository bestellungRepository;
+    private final MaterialRepository materialRepository;
+
+    public ListeService(BenutzerRepository benutzerRepository,
+                        BestellungRepository bestellungRepository,
+                        MaterialRepository materialRepository) {
+        this.benutzerRepository = benutzerRepository;
+        this.bestellungRepository = bestellungRepository;
+        this.materialRepository = materialRepository;
     }
 
-    // Passwort prüfen
-    public boolean checkPasswort(String username, String passwort) {
-        return benutzerRepo.findById(username)
-                .map(b -> b.getPasswort().equals(passwort))
-                .orElse(false);
-    }
-
-    // Benutzer hinzufügen
-    public void addBenutzer(String username, String passwort) {
-        benutzerRepo.save(new Benutzer(username, passwort));
-    }
-
-    // Benutzer löschen
-    public void deleteBenutzer(String username) {
-        benutzerRepo.deleteById(username);
-    }
-
-    // Benutzer aktualisieren
-    public void updateBenutzer(String oldUsername, String newUsername, String newPasswort) {
-        Optional<Benutzer> opt = benutzerRepo.findById(oldUsername);
-        if (opt.isPresent()) {
-            Benutzer benutzer = opt.get();
-            benutzerRepo.delete(benutzer);
-            benutzerRepo.save(new Benutzer(newUsername, newPasswort));
-        }
-    }
-
-    // Alle Benutzer
+    // ===== Benutzer =====
     public List<Benutzer> getAlleBenutzer() {
-        return benutzerRepo.findAll();
+        return benutzerRepository.findAll();
     }
 
-    // Alle Bestellungen
+    public void addBenutzer(String username, String passwort) {
+        benutzerRepository.save(new Benutzer(username, passwort));
+    }
+
+    public void updateBenutzer(String oldUsername, String newUsername, String newPasswort) {
+        Benutzer b = benutzerRepository.findByUsername(oldUsername);
+        if (b != null) {
+            b.setUsername(newUsername);
+            b.setPasswort(newPasswort);
+            benutzerRepository.save(b);
+        }
+    }
+
+    public void deleteBenutzer(String username) {
+        Benutzer b = benutzerRepository.findByUsername(username);
+        if (b != null) benutzerRepository.delete(b);
+    }
+
+    // ===== Bestellungen =====
     public List<Bestellung> getAlleBestellungen() {
-        return bestellungRepo.findAll();
+        return bestellungRepository.findAll();
     }
 
-    // Bestellungen eines Benutzers
-    public List<Bestellung> getBestellungen(String benutzer) {
-        return bestellungRepo.findByBenutzer(benutzer)
-                .stream()
-                .filter(b -> !"Archiviert".equals(b.getStatus()))
-                .toList();
-    }
-
-    // Archivierte Bestellungen
     public List<Bestellung> getAlleArchiviertenBestellungenSorted() {
-        return bestellungRepo.findAll()
-                .stream()
-                .filter(b -> "Archiviert".equals(b.getStatus()))
-                .sorted(Comparator
-                        .comparing(Bestellung::getEingabedatum, Comparator.nullsLast(Comparator.naturalOrder()))
-                        .thenComparing(Bestellung::getMaterial, Comparator.nullsLast(Comparator.naturalOrder())))
-                .toList();
+        return bestellungRepository.findByStatusOrderByEingabedatumDesc("Archiviert");
     }
 
-    // Bestellung speichern
-    public void saveBestellung(Bestellung b) {
-        bestellungRepo.save(b);
-    }
-
-    // Bestellung finden
-    public Optional<Bestellung> findBestellungById(Long id) {
-        return bestellungRepo.findById(id);
-    }
-
-    // Bestellung erstellen
-    public void bestelle(String benutzer, int anzahl, String material) {
-        Bestellung b = new Bestellung(benutzer, anzahl, material, "in Bearbeitung");
-        bestellungRepo.save(b);
-    }
-
-    // Status aktualisieren inkl. Rückgabedatum
-    public void updateStatusMitRueckgabe(Long id, String status) {
-        bestellungRepo.findById(id).ifPresent(b -> {
+    @Transactional
+    public void updateStatusMitBestand(Long id, String status) {
+        Bestellung b = bestellungRepository.findById(id).orElse(null);
+        if (b != null) {
+            String alterStatus = b.getStatus();
             b.setStatus(status);
-            if ("Archiviert".equals(status) && b.getRueckgabedatum() == null) {
-                b.setRueckgabedatum(LocalDateTime.now(zone));
-            }
-            bestellungRepo.save(b);
-        });
-    }
+            bestellungRepository.save(b);
 
-    // Eingabedatum setzen beim "An MatWart senden"
-    public void markiereAlsAbgegeben(String benutzer) {
-        List<Bestellung> liste = bestellungRepo.findByBenutzer(benutzer);
-        for (Bestellung b : liste) {
-            if (b.getEingabedatum() == null) {
-                b.setEingabedatum(LocalDateTime.now(zone));
-                bestellungRepo.save(b);
+            // Bestände anpassen
+            if (!"Archiviert".equals(status)) {
+                Material m = materialRepository.findByName(b.getMaterial());
+                if (m != null) {
+                    // Bestand erhöhen bei Rückgabe
+                    if ("Rückgabe fällig".equals(alterStatus) && "Bestätigt".equals(status)) {
+                        m.setBestand(m.getBestand() - b.getAnzahl());
+                        materialRepository.save(m);
+                    }
+                    // Bestand verringern bei Bestätigung
+                    if ("Bestätigt".equals(status) && !"Bestätigt".equals(alterStatus)) {
+                        m.setBestand(Math.max(0, m.getBestand() - b.getAnzahl()));
+                        materialRepository.save(m);
+                    }
+                }
             }
         }
     }
 
-    // Bestellung nur löschen, wenn Status "in Bearbeitung" und kein Eingabedatum gesetzt
-    public boolean loescheBestellungWennMoeglich(Long id) {
-        return bestellungRepo.findById(id).map(b -> {
-            if ("in Bearbeitung".equals(b.getStatus()) && b.getEingabedatum() == null) {
-                bestellungRepo.delete(b);
-                return true;
-            }
-            return false;
-        }).orElse(false);
+    public void leereArchiv() {
+        List<Bestellung> archiv = getAlleArchiviertenBestellungenSorted();
+        bestellungRepository.deleteAll(archiv);
     }
 
-        public void leereArchiv() {
-        List<Bestellung> archiv = bestellungRepo.findAll()
-            .stream()
-            .filter(b -> "Archiviert".equals(b.getStatus()))
-            .toList();
-        bestellungRepo.deleteAll(archiv);
+    // ===== Inventar =====
+    public List<Material> getAlleMaterialien() {
+        return materialRepository.findAll();
     }
 
-    public ZoneId getZone() {
-        return zone;
+    public void addMaterial(String name, int bestand) {
+        if (materialRepository.findByName(name) == null) {
+            materialRepository.save(new Material(name, bestand));
+        }
+    }
+
+    @PostConstruct
+    public void initInventar() {
+        if (materialRepository.count() == 0) {
+            // Beispiel-Startdaten
+            materialRepository.save(new Material("Hammer", 10));
+            materialRepository.save(new Material("Schraubenzieher", 15));
+            materialRepository.save(new Material("Bohrmaschine", 5));
+        }
     }
 }
