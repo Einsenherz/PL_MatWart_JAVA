@@ -50,10 +50,3 @@ public String login(@RequestParam String username, @RequestParam String passwort
         return "<script>alert('Ungültige Login-Daten!');window.location.href='/';</script>";
     }
 }
-
-    @GetMapping("/logout")
-    public String logout(HttpSession session) {
-        session.invalidate();
-        return "<script>alert('Erfolgreich ausgeloggt!');window.location.href='/';</script>";
-    }
-}
