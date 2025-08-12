@@ -4,7 +4,9 @@ import com.example.myapp.model.Benutzer;
 import com.example.myapp.model.Bestellung;
 import com.example.myapp.model.Material;
 import com.example.myapp.service.ListeService;
-import com.lowagie.text.*;
+
+import com.lowagie.text.Document;
+import com.lowagie.text.Paragraph;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 
@@ -21,6 +23,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/admin")
 public class AdminController {
+
     private final ListeService service;
 
     public AdminController(ListeService service) {
@@ -31,9 +34,13 @@ public class AdminController {
         return "<div class='breadcrumb'><a href='/admin'>Home</a> > " + path + "</div>";
     }
 
+    // ===== Startseite Admin =====
     @GetMapping
     public String adminHome() {
-        return "<html><head><title>Admin</title><link rel='stylesheet' href='/style.css'><script src='/script.js'></script></head><body>"
+        return "<html><head><title>Admin</title>"
+                + "<link rel='stylesheet' href='/style.css'>"
+                + "<script src='/script.js'></script>"
+                + "</head><body>"
                 + "<header><h1>Admin-Bereich</h1></header><main>"
                 + "<form method='get' action='/admin/logins'><button type='submit'>Benutzerverwaltung</button></form>"
                 + "<form method='get' action='/admin/listen'><button type='submit'>Bestellungen</button></form>"
@@ -43,11 +50,15 @@ public class AdminController {
                 + "</main>" + breadcrumb("Admin") + "</body></html>";
     }
 
+    // ===== Benutzerverwaltung =====
     @GetMapping("/logins")
     public String benutzerListe() {
         List<Benutzer> benutzer = service.getAlleBenutzer();
         StringBuilder html = new StringBuilder();
-        html.append("<html><head><title>Benutzerverwaltung</title><link rel='stylesheet' href='/style.css'><script src='/script.js'></script></head><body>");
+        html.append("<html><head><title>Benutzerverwaltung</title>"
+                + "<link rel='stylesheet' href='/style.css'>"
+                + "<script src='/script.js'></script>"
+                + "</head><body>");
         html.append("<header><h1>Benutzerverwaltung</h1></header><main>");
         html.append("<input type='text' class='table-filter' placeholder='Suche Benutzer...' data-table='benutzerTabelle'>");
         html.append("<table id='benutzerTabelle'><thead><tr><th>Benutzername</th><th>Passwort</th><th>Aktionen</th></tr></thead><tbody>");
@@ -79,7 +90,9 @@ public class AdminController {
 
     @GetMapping("/logins/anpassen")
     public String anpassenForm(@RequestParam String username) {
-        return "<html><head><title>Benutzer anpassen</title><link rel='stylesheet' href='/style.css'></head><body>"
+        return "<html><head><title>Benutzer anpassen</title>"
+                + "<link rel='stylesheet' href='/style.css'>"
+                + "</head><body>"
                 + "<header><h1>Benutzer anpassen: " + username + "</h1></header><main>"
                 + "<form method='post' action='/admin/logins/anpassen'>"
                 + "<input type='hidden' name='oldUsername' value='" + username + "'>"
@@ -91,7 +104,9 @@ public class AdminController {
     }
 
     @PostMapping("/logins/anpassen")
-    public String updateBenutzer(@RequestParam String oldUsername, @RequestParam String newUsername, @RequestParam String newPasswort) {
+    public String updateBenutzer(@RequestParam String oldUsername,
+                                 @RequestParam String newUsername,
+                                 @RequestParam String newPasswort) {
         service.updateBenutzer(oldUsername, newUsername, newPasswort);
         return "<script>window.location.href='/admin/logins';</script>";
     }
@@ -102,6 +117,7 @@ public class AdminController {
         return "<script>window.location.href='/admin/logins';</script>";
     }
 
+    // ===== Bestellungen =====
     @GetMapping("/listen")
     public String bestellListe() {
         List<Bestellung> bestellungen = service.getAlleBestellungen().stream()
@@ -110,10 +126,16 @@ public class AdminController {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
         StringBuilder html = new StringBuilder();
-        html.append("<html><head><title>Bestellungen</title><link rel='stylesheet' href='/style.css'><script src='/script.js'></script></head><body>");
+        html.append("<html><head><title>Bestellungen</title>"
+                + "<link rel='stylesheet' href='/style.css'>"
+                + "<script src='/script.js'></script>"
+                + "</head><body>");
         html.append("<header><h1>Bestellungen</h1></header><main>");
         html.append("<input type='text' class='table-filter' placeholder='Suche Bestellungen...' data-table='bestellTabelle'>");
-        html.append("<table id='bestellTabelle'><thead><tr><th>Benutzer</th><th>Anzahl</th><th>Material</th><th>Status</th><th>Eingabedatum</th><th>Rückgabedatum</th><th>Aktionen</th></tr></thead><tbody>");
+        html.append("<table id='bestellTabelle'><thead><tr>"
+                + "<th>Benutzer</th><th>Anzahl</th><th>Material</th><th>Status</th>"
+                + "<th>Eingabedatum</th><th>Rückgabedatum</th><th>Aktionen</th>"
+                + "</tr></thead><tbody>");
         for (Bestellung b : bestellungen) {
             html.append("<tr>")
                 .append("<td>").append(b.getBenutzer()).append("</td>")
@@ -139,16 +161,22 @@ public class AdminController {
         return html.toString();
     }
 
+    // ===== Archiv =====
     @GetMapping("/archiv")
     public String archivListe() {
         List<Bestellung> archiv = service.getAlleArchiviertenBestellungenSorted();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
         StringBuilder html = new StringBuilder();
-        html.append("<html><head><title>Archiv</title><link rel='stylesheet' href='/style.css'><script src='/script.js'></script></head><body>");
+        html.append("<html><head><title>Archiv</title>"
+                + "<link rel='stylesheet' href='/style.css'>"
+                + "<script src='/script.js'></script>"
+                + "</head><body>");
         html.append("<header><h1>Archiv</h1></header><main>");
         html.append("<input type='text' class='table-filter' placeholder='Suche im Archiv...' data-table='archivTabelle'>");
-        html.append("<table id='archivTabelle'><thead><tr><th>Benutzer</th><th>Anzahl</th><th>Material</th><th>Eingabedatum</th><th>Rückgabedatum</th></tr></thead><tbody>");
+        html.append("<table id='archivTabelle'><thead><tr>"
+                + "<th>Benutzer</th><th>Anzahl</th><th>Material</th><th>Eingabedatum</th><th>Rückgabedatum</th>"
+                + "</tr></thead><tbody>");
         for (Bestellung b : archiv) {
             html.append("<tr>")
                 .append("<td>").append(b.getBenutzer()).append("</td>")
@@ -226,12 +254,15 @@ public class AdminController {
         return "<script>window.location.href='/admin/archiv';</script>";
     }
 
-    // ===== Inventar-Seite =====
+    // ===== Inventar =====
     @GetMapping("/inventar")
     public String inventarListe() {
         List<Material> inventar = service.getAlleMaterialien();
         StringBuilder html = new StringBuilder();
-        html.append("<html><head><title>Inventar</title><link rel='stylesheet' href='/style.css'><script src='/script.js'></script></head><body>");
+        html.append("<html><head><title>Inventar</title>"
+                + "<link rel='stylesheet' href='/style.css'>"
+                + "<script src='/script.js'></script>"
+                + "</head><body>");
         html.append("<header><h1>Inventar</h1></header><main>");
         html.append("<input type='text' class='table-filter' placeholder='Suche Material...' data-table='inventarTabelle'>");
         html.append("<table id='inventarTabelle'><thead><tr><th>Name</th><th>Bestand</th></tr></thead><tbody>");
@@ -276,7 +307,7 @@ public class AdminController {
         }
     }
 
-    // ===== Bestellungsstatus aktualisieren (inkl. Bestand) =====
+    // ===== Status/Archiv inkl. Bestandsanpassung =====
     @PostMapping("/listen/status")
     public String updateStatus(@RequestParam Long id, @RequestParam String status) {
         service.updateStatusMitBestand(id, status);
@@ -288,6 +319,4 @@ public class AdminController {
         service.updateStatusMitBestand(id, "Archiviert");
         return "<script>window.location.href='/admin/listen';</script>";
     }
-}
-
 }
