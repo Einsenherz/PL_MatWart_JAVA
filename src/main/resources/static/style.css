@@ -1,0 +1,10 @@
+body {
+    background-color: #f0f8ff; /* hellblau */
+    font-family: Arial, sans-serif;
+}
+
+header {
+    background-color: #004080; /* dunkelblau */
+    color: white;
+    padding: 10px;
+}
