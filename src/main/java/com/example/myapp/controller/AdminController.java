@@ -31,21 +31,12 @@ public class AdminController {
         this.service = service;
     }
 
-    private boolean isLoggedInAsAdmin(HttpSession session) {
-        String role = (String) session.getAttribute("role");
-        return role != null && role.equals("admin");
-    }
-
     private String breadcrumb(String path) {
         return "<div class='breadcrumb'><a href='/admin'>Home</a> > " + path + "</div>";
     }
 
     @GetMapping
-    public String adminHome(HttpSession session) {
-        if (!isLoggedInAsAdmin(session)) {
-            return "<script>alert('Bitte zuerst als Admin einloggen!');window.location.href='/';</script>";
-        }
-
+    public String adminHome() {
         return "<html><head><title>Adminbereich</title><link rel='stylesheet' href='/style.css'><script src='/script.js'></script></head><body>"
                 + "<header><h1>Adminbereich</h1></header><main class='centered-content'>"
                 + "<form method='get' action='/admin/bestellungen'><button type='submit'>Alle Bestellungen</button></form>"
