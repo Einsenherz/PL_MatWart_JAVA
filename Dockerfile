@@ -1,5 +1,4 @@
 # Build Stage
-DOCKER_BUILDKIT=1
 FROM maven:3.9.5-eclipse-temurin-17 AS build
 WORKDIR /app
 
