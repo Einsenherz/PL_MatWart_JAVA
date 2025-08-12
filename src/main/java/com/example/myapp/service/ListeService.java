@@ -1,3 +1,18 @@
+package com.example.myapp.service;
+
+import com.example.myapp.model.Benutzer;
+import com.example.myapp.model.Bestellung;
+import com.example.myapp.model.Material;
+import com.example.myapp.repository.BenutzerRepository;
+import com.example.myapp.repository.BestellungRepository;
+import com.example.myapp.repository.MaterialRepository;
+import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Service
 public class ListeService {
 
@@ -90,8 +105,8 @@ public class ListeService {
             b.setStatus(status);
             bestellungRepository.save(b);
 
-            // Bestände nur anpassen, wenn auf "Archiviert" gesetzt wird
-            if ("Archiviert".equals(status)) {
+            // Bestände nur anpassen, wenn auf "Archiviert" gesetzt wird (egal welche Schreibweise)
+            if ("archiviert".equalsIgnoreCase(status)) {
                 Material m = materialRepository.findByName(b.getMaterial());
                 if (m != null) {
                     m.setBestand(Math.max(0, m.getBestand() - b.getAnzahl()));
