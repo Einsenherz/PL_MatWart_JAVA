@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.annotation.PostConstruct;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -62,29 +63,26 @@ public class ListeService {
     }
 
     @Transactional
-    public void updateStatusMitBestand(Long id, String status) {
+    public void updateStatusMitBestand(Long id, String neuerStatus) {
         Bestellung b = bestellungRepository.findById(id).orElse(null);
         if (b != null) {
             String alterStatus = b.getStatus();
-            b.setStatus(status);
-            bestellungRepository.save(b);
 
-            // Bestände anpassen
-            if (!"Archiviert".equals(status)) {
+            // Status setzen
+            b.setStatus(neuerStatus);
+
+            // Wenn Archiviert => Bestand erhöhen & Rueckgabedatum setzen
+            if ("Archiviert".equals(neuerStatus) && !"Archiviert".equals(alterStatus)) {
                 Material m = materialRepository.findByName(b.getMaterial());
                 if (m != null) {
-                    // Bestand erhöhen bei Rückgabe
-                    if ("Rückgabe fällig".equals(alterStatus) && "Bestätigt".equals(status)) {
-                        m.setBestand(m.getBestand() - b.getAnzahl());
-                        materialRepository.save(m);
-                    }
-                    // Bestand verringern bei Bestätigung
-                    if ("Bestätigt".equals(status) && !"Bestätigt".equals(alterStatus)) {
-                        m.setBestand(Math.max(0, m.getBestand() - b.getAnzahl()));
-                        materialRepository.save(m);
-                    }
+                    m.setBestand(m.getBestand() + b.getAnzahl());
+                    materialRepository.save(m);
                 }
+                b.setRueckgabedatum(LocalDateTime.now());
             }
+
+            // Keine Bestandsänderung bei "Rückgabe fällig" oder "Bestätigt"
+            bestellungRepository.save(b);
         }
     }
 
