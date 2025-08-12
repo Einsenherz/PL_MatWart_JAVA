@@ -48,17 +48,16 @@ public class SecurityController implements HandlerInterceptor, WebMvcConfigurer 
     }
 
     @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(this)
-                // Nur die geschützten Bereiche absichern:
-                .addPathPatterns("/admin/**", "/benutzer/**")
-                // WICHTIG: Alles statische und Login/Logout explizit ausnehmen:
-                .excludePathPatterns(
-                        "/", "/login", "/logout", "/error",
-                        "/style.css", "/script.js",
-                        "/images/**", "/css/**", "/js/**", "/webjars/**",
-                        "/h2-console/**"
-                );
-    }
+public void addInterceptors(InterceptorRegistry registry) {
+    registry.addInterceptor(this)
+        .addPathPatterns("/admin/**", "/benutzer/**")
+        .excludePathPatterns(
+            "/", "/login", "/logout", "/error",
+            "/style.css", "/script.js",
+            "/images/**", "/css/**", "/js/**", "/webjars/**",
+            "/h2-console/**", "/favicon.ico"
+        );
+}
+
 }
 
