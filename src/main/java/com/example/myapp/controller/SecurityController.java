@@ -28,19 +28,21 @@ public class SecurityController implements HandlerInterceptor, WebMvcConfigurer 
 
         // Benutzer-Bereich absichern
         if (uri.startsWith("/benutzer")) {
-            if (session != null && "benutzer".equals(session.getAttribute("role"))) {
+            if (session != null && (
+                    "benutzer".equals(session.getAttribute("role")) ||
+                    "admin".equals(session.getAttribute("role")))) { // Admin darf auch Benutzerbereich sehen
                 return true;
             }
             redirectLogin(response, "Bitte zuerst einloggen!");
             return false;
         }
 
-        //statische Dateien alle durchwinken
+        // statische Dateien (CSS, JS, Bilder) immer erlauben
         if (handler instanceof ResourceHttpRequestHandler) {
-    return true; // CSS, JS, Bilder immer erlauben
-}
+            return true;
+        }
 
-        // Alles andere (Startseite, Login, statische Ressourcen, h2-console, Fehlerseiten) ist frei
+        // Alles andere (Startseite, Login, Fehlerseiten) ist frei
         return true;
     }
 
@@ -51,14 +53,14 @@ public class SecurityController implements HandlerInterceptor, WebMvcConfigurer 
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-    registry.addInterceptor(this)
-            .addPathPatterns("/admin/**", "/benutzer/**")
-            .excludePathPatterns(
-                "/", "/login", "/logout", "/error",
-                "/style.css", "/script.js",
-                "/**/*.css", "/**/*.js",
-                "/images/**", "/css/**", "/js/**", "/webjars/**",
-                "/h2-console/**"
-            );
+        registry.addInterceptor(this)
+                .addPathPatterns("/admin/**", "/benutzer/**")
+                .excludePathPatterns(
+                        "/", "/login", "/logout", "/error",
+                        "/style.css", "/script.js",
+                        "/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.jpeg", "/**/*.gif",
+                        "/images/**", "/css/**", "/js/**", "/webjars/**",
+                        "/h2-console/**"
+                );
+    }
 }
-
