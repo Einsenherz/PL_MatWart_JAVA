@@ -53,7 +53,12 @@ public class SecurityController implements HandlerInterceptor, WebMvcConfigurer 
     public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(this)
             .addPathPatterns("/admin/**", "/benutzer/**")
-            .excludePathPatterns("/", "/login", "/logout", "/error", "/h2-console/**");
-}
+            .excludePathPatterns(
+                "/", "/login", "/logout", "/error",
+                "/style.css", "/script.js",
+                "/**/*.css", "/**/*.js",
+                "/images/**", "/css/**", "/js/**", "/webjars/**",
+                "/h2-console/**"
+            );
 }
 
