@@ -9,37 +9,36 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * Sichert automatisch Admin- und Benutzer-Routen über die Session.
+ * Sichert automatisch Admin- und Benutzer-Routen.
+ * Prüft die Session und lässt statische Ressourcen IMMER durch.
  */
 @Component
 public class SecurityController implements HandlerInterceptor, WebMvcConfigurer {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String uri = request.getRequestURI();
-        HttpSession session = request.getSession(false);
+        final String uri = request.getRequestURI();
+        final HttpSession session = request.getSession(false);
 
-        // Admin-Bereich
+        // Admin-Bereich absichern
         if (uri.startsWith("/admin")) {
             if (session != null && "admin".equals(session.getAttribute("role"))) {
                 return true;
-            } else {
-                redirectLogin(response, "Bitte zuerst als Admin einloggen!");
-                return false;
             }
+            redirectLogin(response, "Bitte zuerst als Admin einloggen!");
+            return false;
         }
 
-        // Benutzer-Bereich
+        // Benutzer-Bereich absichern
         if (uri.startsWith("/benutzer")) {
             if (session != null && "benutzer".equals(session.getAttribute("role"))) {
                 return true;
-            } else {
-                redirectLogin(response, "Bitte zuerst einloggen!");
-                return false;
             }
+            redirectLogin(response, "Bitte zuerst einloggen!");
+            return false;
         }
 
-        // Alles andere frei (Login, Startseite, Assets)
+        // Alles andere (Startseite, Login, statische Ressourcen, h2-console, Fehlerseiten) ist frei
         return true;
     }
 
@@ -51,11 +50,15 @@ public class SecurityController implements HandlerInterceptor, WebMvcConfigurer 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(this)
+                // Nur die geschützten Bereiche absichern:
                 .addPathPatterns("/admin/**", "/benutzer/**")
+                // WICHTIG: Alles statische und Login/Logout explizit ausnehmen:
                 .excludePathPatterns(
                         "/", "/login", "/logout", "/error",
                         "/style.css", "/script.js",
-                        "/css/**", "/js/**", "/images/**", "/webjars/**", "/favicon.ico"
+                        "/images/**", "/css/**", "/js/**", "/webjars/**",
+                        "/h2-console/**"
                 );
     }
 }
+
