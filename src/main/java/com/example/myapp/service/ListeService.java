@@ -1,20 +1,3 @@
-package com.example.myapp.service;
-
-import com.example.myapp.model.Benutzer;
-import com.example.myapp.model.Bestellung;
-import com.example.myapp.model.Material;
-import com.example.myapp.repository.BenutzerRepository;
-import com.example.myapp.repository.BestellungRepository;
-import com.example.myapp.repository.MaterialRepository;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import jakarta.annotation.PostConstruct;
-
-import java.time.LocalDateTime;
-import java.util.List;
-
 @Service
 public class ListeService {
 
@@ -30,23 +13,24 @@ public class ListeService {
         this.materialRepository = materialRepository;
     }
 
-    // ===== Benutzer =====
-    @PostConstruct
-    public void initAdminUser() {
-        if (benutzerRepository.findByUsername("admin") == null) {
-            benutzerRepository.save(new Benutzer("admin", "Dieros8500"));
-        }
-    }
-    
+    // ===== Benutzer (ohne Admin in DB) =====
     public List<Benutzer> getAlleBenutzer() {
-        return benutzerRepository.findAll();
+        // Admin wird nicht mit aufgelistet
+        List<Benutzer> benutzer = benutzerRepository.findAll();
+        benutzer.removeIf(b -> "admin".equalsIgnoreCase(b.getUsername()));
+        return benutzer;
     }
 
     public void addBenutzer(String username, String passwort) {
-        benutzerRepository.save(new Benutzer(username, passwort));
+        if (!"admin".equalsIgnoreCase(username)) {
+            benutzerRepository.save(new Benutzer(username, passwort));
+        }
     }
 
     public void updateBenutzer(String oldUsername, String newUsername, String newPasswort) {
+        if ("admin".equalsIgnoreCase(oldUsername) || "admin".equalsIgnoreCase(newUsername)) {
+            return; // Admin darf nicht geändert werden
+        }
         Benutzer b = benutzerRepository.findByUsername(oldUsername);
         if (b != null) {
             b.setUsername(newUsername);
@@ -56,19 +40,21 @@ public class ListeService {
     }
 
     public void deleteBenutzer(String username) {
+        if ("admin".equalsIgnoreCase(username)) return; // Admin darf nicht gelöscht werden
         Benutzer b = benutzerRepository.findByUsername(username);
         if (b != null) benutzerRepository.delete(b);
     }
 
-     // ===== Login =====
+    // ===== Login =====
     public String checkLogin(String username, String passwort) {
+        // Hardcodierter Admin
+        if ("admin".equalsIgnoreCase(username) && "Dieros8500".equals(passwort)) {
+            return "admin";
+        }
+
         Benutzer benutzer = benutzerRepository.findByUsername(username);
         if (benutzer != null && benutzer.getPasswort().equals(passwort)) {
-            if ("admin".equalsIgnoreCase(username)) {
-                return "admin";
-            } else {
-                return "benutzer";
-            }
+            return "benutzer";
         }
         return null;
     }
@@ -96,24 +82,24 @@ public class ListeService {
         bestellung.setEingabedatum(LocalDateTime.now());
         bestellungRepository.save(bestellung);
     }
-    
+
     @Transactional
     public void updateStatusMitBestand(Long id, String status) {
-    Bestellung b = bestellungRepository.findById(id).orElse(null);
-    if (b != null) {
-        b.setStatus(status);
-        bestellungRepository.save(b);
+        Bestellung b = bestellungRepository.findById(id).orElse(null);
+        if (b != null) {
+            b.setStatus(status);
+            bestellungRepository.save(b);
 
-        // Bestände nur anpassen, wenn auf "Archiviert" gesetzt wird
-        if ("Archiviert".equals(status)) {
-            Material m = materialRepository.findByName(b.getMaterial());
-            if (m != null) {
-                m.setBestand(Math.max(0, m.getBestand() - b.getAnzahl()));
-                materialRepository.save(m);
+            // Bestände nur anpassen, wenn auf "Archiviert" gesetzt wird
+            if ("Archiviert".equals(status)) {
+                Material m = materialRepository.findByName(b.getMaterial());
+                if (m != null) {
+                    m.setBestand(Math.max(0, m.getBestand() - b.getAnzahl()));
+                    materialRepository.save(m);
+                }
             }
         }
     }
-}
 
     public void leereArchiv() {
         List<Bestellung> archiv = getAlleArchiviertenBestellungenSorted();
