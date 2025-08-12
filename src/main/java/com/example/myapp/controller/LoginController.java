@@ -42,10 +42,4 @@ public class LoginController extends BasePageController {
             return "<script>window.location.href='/benutzer';</script>";
         }
     }
-
-    @GetMapping("/logout")
-    public String logout(HttpSession session) {
-        if (session != null) session.invalidate();
-        return "<script>window.location.href='/';</script>";
-    }
 }
