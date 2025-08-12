@@ -6,5 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface BestellungRepository extends JpaRepository<Bestellung, Long> {
-    List<Bestellung> findByBenutzer(String benutzer);
+    List<Bestellung> findByStatusOrderByEingabedatumDesc(String status);
+    List<Bestellung> findByBenutzerOrderByEingabedatumDesc(String benutzer);
 }
