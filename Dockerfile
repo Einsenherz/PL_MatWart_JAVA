@@ -1,17 +1,38 @@
-# Build Stage
-FROM maven:3.9.5-eclipse-temurin-17 AS build
+# ---------- Build stage ----------
+FROM eclipse-temurin:17-jdk-alpine AS build
+
 WORKDIR /app
 
-COPY pom.xml .
+# Maven Wrapper optional – wenn du keinen wrapper hast, nimm das Standard-Maven-Image raus.
+# Falls du den Wrapper benutzt, kopiere ihn mit:
+# COPY mvnw pom.xml ./
+# COPY .mvn .mvn
+# RUN chmod +x mvnw && ./mvnw -v
+
+# Ohne Wrapper: Maven über das Image installieren
+RUN apk add --no-cache maven
+
+# Erst pom kopieren und Dependencies cachen
+COPY pom.xml ./pom.xml
+RUN mvn -q -e -B dependency:go-offline
+
+# Dann den Rest
 COPY src ./src
 
-RUN mvn clean package -DskipTests
+# Bauen (Tests überspringen, optional)
+RUN mvn -q -e -B clean package -DskipTests
 
-# Runtime Stage
+# ---------- Runtime stage ----------
 FROM eclipse-temurin:17-jre-alpine
+
+# Für H2-Datei-DB braucht das Image Schreibrechte
 WORKDIR /app
 
-COPY --from=build /app/target/myapp-0.0.1-SNAPSHOT.jar app.jar
+# Jar vom Build übernehmen
+COPY --from=build /app/target/*.jar /app/app.jar
 
+# Port
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+# Start
+ENTRYPOINT ["java","-jar","/app/app.jar"]
