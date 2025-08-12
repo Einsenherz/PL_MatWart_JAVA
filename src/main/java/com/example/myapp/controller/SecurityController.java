@@ -11,9 +11,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 /**
  * SecurityController sichert automatisch Admin- und Benutzer-Routen.
  * Liegt im Controller-Paket und prüft jede Anfrage auf gültige Session.
+ * Hardcodierter Admin: Benutzername "admin" + Passwort "Dieros8500"
  */
 @Component
 public class SecurityController implements HandlerInterceptor, WebMvcConfigurer {
+
+    private static final String ADMIN_USER = "admin";
+    private static final String ADMIN_PASS = "Dieros8500";
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -21,33 +25,45 @@ public class SecurityController implements HandlerInterceptor, WebMvcConfigurer 
         String uri = request.getRequestURI();
         HttpSession session = request.getSession(false);
 
-        // --- Admin-Bereich absichern ---
+        // ==== Kein Login vorhanden ====
+        if (session == null || session.getAttribute("username") == null) {
+            // Freie Routen durchlassen
+            if (isPublicRoute(uri)) return true;
+            redirectLogin(response, "Bitte zuerst einloggen!");
+            return false;
+        }
+
+        String username = (String) session.getAttribute("username");
+        String role = (String) session.getAttribute("role");
+        String password = (String) session.getAttribute("password");
+
+        // ==== Admin-Bereich ====
         if (uri.startsWith("/admin")) {
-            if (session != null && "admin".equals(session.getAttribute("role"))) {
+            if (ADMIN_USER.equals(username) && ADMIN_PASS.equals(password)) {
                 return true;
-            } else {
-                redirectLogin(response, "Bitte zuerst als Admin einloggen!");
-                return false;
             }
+            redirectLogin(response, "Keine Berechtigung für den Adminbereich!");
+            return false;
         }
 
-        // --- Benutzer-Bereich absichern ---
+        // ==== Benutzer-Bereich ====
         if (uri.startsWith("/benutzer")) {
-            if (session != null && "benutzer".equals(session.getAttribute("role"))) {
+            if ("benutzer".equals(role)) {
                 return true;
-            } else {
-                redirectLogin(response, "Bitte zuerst einloggen!");
-                return false;
             }
+            redirectLogin(response, "Keine Berechtigung für den Benutzerbereich!");
+            return false;
         }
 
-        // Andere Routen (Startseite, Login etc.) sind frei
-        return true;
+        return true; // andere Routen zulassen
     }
 
-    /**
-     * Hilfsmethode für einen Redirect mit Alert-Meldung.
-     */
+    private boolean isPublicRoute(String uri) {
+        return uri.equals("/") || uri.equals("/login") || uri.startsWith("/h2-console")
+                || uri.startsWith("/style.css") || uri.startsWith("/script.js")
+                || uri.startsWith("/images/");
+    }
+
     private void redirectLogin(HttpServletResponse response, String message) throws Exception {
         response.setContentType("text/html; charset=UTF-8");
         response.getWriter().write(
@@ -58,9 +74,7 @@ public class SecurityController implements HandlerInterceptor, WebMvcConfigurer 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(this)
-                .addPathPatterns("/admin/**", "/benutzer/**", "/css/**", "/js/**", "/images/**", "/style.css")
-                .excludePathPatterns(
-                        "/", "/login", "/error"
-                );
+                .addPathPatterns("/**") // prüft alles
+                .excludePathPatterns("/", "/login", "/error", "/h2-console/**", "/style.css", "/script.js", "/images/**");
     }
 }
