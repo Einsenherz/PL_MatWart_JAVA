@@ -21,7 +21,13 @@
   <properties>
     <java.version>17</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.compiler.release>17</maven.compiler.release>
+    <spring.boot.version>3.3.2</spring.boot.version>
+
+    <!-- Versions für zusätzliche Libs -->
+    <jackson.version>2.17.2</jackson.version>
+    <okhttp.version>4.12.0</okhttp.version>
   </properties>
 
   <dependencies>
@@ -49,6 +55,13 @@
       <groupId>com.github.librepdf</groupId>
       <artifactId>openpdf</artifactId>
       <version>1.3.39</version>
+    </dependency>
+
+    <!-- JSON (für Speicherliste.json) -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.version}</version>
     </dependency>
 
     <!-- Optional: Validation (falls verwendet) -->
