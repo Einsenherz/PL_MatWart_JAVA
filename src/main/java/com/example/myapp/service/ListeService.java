@@ -1,4 +1,5 @@
 package com.example.myapp.service;
+import com.example.myapp.integration.SpeicherListeSyncService;
 
 import com.example.myapp.model.Benutzer;
 import com.example.myapp.model.Bestellung;
