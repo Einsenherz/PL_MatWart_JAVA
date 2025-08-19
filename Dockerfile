@@ -1,38 +1,34 @@
 # ---------- Build stage ----------
-FROM eclipse-temurin:17-jdk-alpine AS build
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 
 WORKDIR /app
 
-# Maven Wrapper optional – wenn du keinen wrapper hast, nimm das Standard-Maven-Image raus.
-# Falls du den Wrapper benutzt, kopiere ihn mit:
-# COPY mvnw pom.xml ./
-# COPY .mvn .mvn
-# RUN chmod +x mvnw && ./mvnw -v
+# Setze Maven auf Single-Thread Build (stabiler in Render/Docker)
+ENV MAVEN_OPTS="-Dmaven.artifact.threads=1"
 
-# Ohne Wrapper: Maven über das Image installieren
-RUN apk add --no-cache maven
+# Erst nur pom.xml kopieren und Dependencies cachen
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
 
-# Erst pom kopieren und Dependencies cachen
-COPY pom.xml ./pom.xml
-RUN mvn -q -e -B dependency:go-offline
-
-# Dann den Rest
+# Danach Source-Code kopieren
 COPY src ./src
 
-# Bauen (Tests überspringen, optional)
-RUN mvn -q -e -B clean package -DskipTests
+# Build (Tests überspringen, um schneller zu deployen)
+RUN mvn clean package -DskipTests -B
 
 # ---------- Runtime stage ----------
 FROM eclipse-temurin:17-jre-alpine
 
-# Für H2-Datei-DB braucht das Image Schreibrechte
 WORKDIR /app
 
-# Jar vom Build übernehmen
-COPY --from=build /app/target/*.jar /app/app.jar
+# Fat Jar ins Runtime-Image kopieren
+COPY --from=build /app/target/*.jar app.jar
 
-# Port
+# Falls H2 oder andere Dateien persistent sein müssen, Mountpoint
+VOLUME /app/data
+
+# Port, den Spring Boot bindet
 EXPOSE 8080
 
-# Start
+# Startkommando
 ENTRYPOINT ["java","-jar","/app/app.jar"]
