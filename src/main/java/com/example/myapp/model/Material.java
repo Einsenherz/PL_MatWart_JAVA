@@ -1,45 +1,22 @@
 package com.example.myapp.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
+@Table(name = "material")
 public class Material {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true)
     private String name;
-    private int bestand;
 
-    public Material() {
-    }
+    @Column(nullable = false)
+    private int bestand = 0;
 
-    public Material(String name, int bestand) {
-        this.name = name;
-        this.bestand = bestand;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getBestand() {
-        return bestand;
-    }
-
-    public void setBestand(int bestand) {
-        this.bestand = bestand;
-    }
+    public Long getId() { return id; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public int getBestand() { return bestand; }
+    public void setBestand(int bestand) { this.bestand = bestand; }
 }
