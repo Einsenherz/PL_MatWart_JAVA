@@ -11,6 +11,7 @@ import com.lowagie.text.pdf.PdfWriter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayOutputStream;
@@ -30,6 +31,7 @@ public class AdminController extends BasePageController {
 
     // ===== Startseite Admin =====
     @GetMapping
+    @ResponseBody
     public String adminHome() {
         return htmlHeader("Adminbereich")
                 + "<form method='get' action='/admin/logins'><button type='submit'>Benutzerverwaltung</button></form>"
@@ -43,6 +45,7 @@ public class AdminController extends BasePageController {
 
     // ===== Benutzerverwaltung =====
     @GetMapping("/logins")
+    @ResponseBody
     public String benutzerListe() {
         List<Benutzer> benutzer = service.getAlleBenutzer();
         StringBuilder html = new StringBuilder();
@@ -51,13 +54,13 @@ public class AdminController extends BasePageController {
         html.append("<table id='benutzerTabelle'><thead><tr><th>Benutzername</th><th>Passwort</th><th>Aktionen</th></tr></thead><tbody>");
         for (Benutzer b : benutzer) {
             html.append("<tr><td>").append(b.getUsername()).append("</td>")
-                    .append("<td>").append(b.getPasswort()).append("</td><td>")
-                    .append("<form style='display:inline;' method='get' action='/admin/logins/anpassen'>")
-                    .append("<input type='hidden' name='username' value='").append(b.getUsername()).append("'>")
-                    .append("<button type='submit'>Anpassen</button></form>")
-                    .append("<form style='display:inline;' method='post' action='/admin/logins/loeschen' onsubmit='return confirm(\"Benutzer wirklich löschen?\");'>")
-                    .append("<input type='hidden' name='username' value='").append(b.getUsername()).append("'>")
-                    .append("<button type='submit'>Löschen</button></form></td></tr>");
+                .append("<td>").append(b.getPasswort()).append("</td><td>")
+                .append("<form style='display:inline;' method='get' action='/admin/logins/anpassen'>")
+                .append("<input type='hidden' name='username' value='").append(b.getUsername()).append("'>")
+                .append("<button type='submit'>Anpassen</button></form>")
+                .append("<form style='display:inline;' method='post' action='/admin/logins/loeschen' onsubmit='return confirm(\"Benutzer wirklich löschen?\");'>")
+                .append("<input type='hidden' name='username' value='").append(b.getUsername()).append("'>")
+                .append("<button type='submit'>Löschen</button></form></td></tr>");
         }
         html.append("</tbody></table>");
         html.append("<h2>Neuen Benutzer hinzufügen</h2>");
@@ -70,22 +73,29 @@ public class AdminController extends BasePageController {
         return html.toString();
     }
 
+    // GET auf /admin/logins/add: direkte URL-Aufrufe sauber behandeln
+    @GetMapping("/logins/add")
+    public String addBenutzerGetFallback() {
+        return "redirect:/admin/logins";
+    }
+
     @PostMapping("/logins/add")
     public String addBenutzer(@RequestParam String username, @RequestParam String passwort) {
         service.addBenutzer(username, passwort);
-        return "<script>window.location.href='/admin/logins';</script>";
+        return "redirect:/admin/logins";
     }
 
     @GetMapping("/logins/anpassen")
+    @ResponseBody
     public String anpassenForm(@RequestParam String username) {
         StringBuilder sb = new StringBuilder();
         sb.append(htmlHeader("Benutzer anpassen"));
         sb.append("<form method='post' action='/admin/logins/anpassen'>")
-                .append("<input type='hidden' name='oldUsername' value='").append(username).append("'>")
-                .append("Neuer Benutzername: <input type='text' name='newUsername' value='").append(username).append("' required><br>")
-                .append("Neues Passwort: <input type='password' name='newPasswort' required><br>")
-                .append("<button type='submit'>Bestätigen</button></form>")
-                .append("<form method='get' action='/admin/logins'><button class='btn-back' type='submit'>Abbrechen</button></form>");
+          .append("<input type='hidden' name='oldUsername' value='").append(username).append("'>")
+          .append("Neuer Benutzername: <input type='text' name='newUsername' value='").append(username).append("' required><br>")
+          .append("Neues Passwort: <input type='password' name='newPasswort' required><br>")
+          .append("<button type='submit'>Bestätigen</button></form>")
+          .append("<form method='get' action='/admin/logins'><button class='btn-back' type='submit'>Abbrechen</button></form>");
         sb.append(breadcrumb("/admin", "Benutzer anpassen"));
         sb.append(htmlFooter());
         return sb.toString();
@@ -96,17 +106,18 @@ public class AdminController extends BasePageController {
                                  @RequestParam String newUsername,
                                  @RequestParam String newPasswort) {
         service.updateBenutzer(oldUsername, newUsername, newPasswort);
-        return "<script>window.location.href='/admin/logins';</script>";
+        return "redirect:/admin/logins";
     }
 
     @PostMapping("/logins/loeschen")
     public String loescheBenutzer(@RequestParam String username) {
         service.deleteBenutzer(username);
-        return "<script>window.location.href='/admin/logins';</script>";
+        return "redirect:/admin/logins";
     }
 
     // ===== Bestellungen =====
     @GetMapping("/listen")
+    @ResponseBody
     public String bestellListe() {
         List<Bestellung> bestellungen = service.getAlleBestellungen().stream()
                 .filter(b -> !"Archiviert".equals(b.getStatus()))
@@ -122,22 +133,22 @@ public class AdminController extends BasePageController {
                 + "</tr></thead><tbody>");
         for (Bestellung b : bestellungen) {
             html.append("<tr>")
-                    .append("<td>").append(b.getBenutzer()).append("</td>")
-                    .append("<td>").append(b.getAnzahl()).append("</td>")
-                    .append("<td>").append(b.getMaterial()).append("</td>")
-                    .append("<td><form method='post' action='/admin/listen/status'>")
-                    .append("<input type='hidden' name='id' value='").append(b.getId()).append("'>")
-                    .append("<select name='status'>")
-                    .append("<option value='in Bearbeitung'").append("in Bearbeitung".equals(b.getStatus()) ? " selected" : "").append(">in Bearbeitung</option>")
-                    .append("<option value='Bestätigt'").append("Bestätigt".equals(b.getStatus()) ? " selected" : "").append(">Bestätigt</option>")
-                    .append("<option value='Rückgabe fällig'").append("Rückgabe fällig".equals(b.getStatus()) ? " selected" : "").append(">Rückgabe fällig</option>")
-                    .append("</select><button type='submit'>Ändern</button></form></td>")
-                    .append("<td>").append(b.getEingabedatum() != null ? b.getEingabedatum().format(dtf) : "").append("</td>")
-                    .append("<td>").append(b.getRueckgabedatum() != null ? b.getRueckgabedatum().format(dtf) : "").append("</td>")
-                    .append("<td><form method='post' action='/admin/listen/archivieren' onsubmit='return confirm(\"Bestellung archivieren?\");'>")
-                    .append("<input type='hidden' name='id' value='").append(b.getId()).append("'>")
-                    .append("<button type='submit'>Archivieren</button></form></td>")
-                    .append("</tr>");
+                .append("<td>").append(b.getBenutzer()).append("</td>")
+                .append("<td>").append(b.getAnzahl()).append("</td>")
+                .append("<td>").append(b.getMaterial()).append("</td>")
+                .append("<td><form method='post' action='/admin/listen/status'>")
+                .append("<input type='hidden' name='id' value='").append(b.getId()).append("'>")
+                .append("<select name='status'>")
+                .append("<option value='in Bearbeitung'").append("in Bearbeitung".equals(b.getStatus()) ? " selected" : "").append(">in Bearbeitung</option>")
+                .append("<option value='Bestätigt'").append("Bestätigt".equals(b.getStatus()) ? " selected" : "").append(">Bestätigt</option>")
+                .append("<option value='Rückgabe fällig'").append("Rückgabe fällig".equals(b.getStatus()) ? " selected" : "").append(">Rückgabe fällig</option>")
+                .append("</select><button type='submit'>Ändern</button></form></td>")
+                .append("<td>").append(b.getEingabedatum() != null ? b.getEingabedatum().format(dtf) : "").append("</td>")
+                .append("<td>").append(b.getRueckgabedatum() != null ? b.getRueckgabedatum().format(dtf) : "").append("</td>")
+                .append("<td><form method='post' action='/admin/listen/archivieren' onsubmit='return confirm(\"Bestellung archivieren?\");'>")
+                .append("<input type='hidden' name='id' value='").append(b.getId()).append("'>")
+                .append("<button type='submit'>Archivieren</button></form></td>")
+                .append("</tr>");
         }
         html.append("</tbody></table>");
         html.append("<form method='get' action='/admin'><button class='btn-back' type='submit'>Zurück</button></form>");
@@ -150,18 +161,19 @@ public class AdminController extends BasePageController {
     public String updateStatus(@RequestParam Long id, @RequestParam String status) {
         // Bestand ändert sich nur bei "Archiviert" (Logik steckt in ListeService.updateStatusMitBestand)
         service.updateStatusMitBestand(id, status);
-        return "<script>window.location.href='/admin/listen';</script>";
+        return "redirect:/admin/listen";
     }
 
     @PostMapping("/listen/archivieren")
     public String archivieren(@RequestParam Long id) {
         // Archivieren = Status setzen + (falls nicht schon) Bestand verringern
         service.updateStatusMitBestand(id, "Archiviert");
-        return "<script>window.location.href='/admin/listen';</script>";
+        return "redirect:/admin/listen";
     }
 
     // ===== Archiv =====
     @GetMapping("/archiv")
+    @ResponseBody
     public String archivListe() {
         List<Bestellung> archiv = service.getAlleArchiviertenBestellungenSorted();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
@@ -174,12 +186,12 @@ public class AdminController extends BasePageController {
                 + "</tr></thead><tbody>");
         for (Bestellung b : archiv) {
             html.append("<tr>")
-                    .append("<td>").append(b.getBenutzer()).append("</td>")
-                    .append("<td>").append(b.getAnzahl()).append("</td>")
-                    .append("<td>").append(b.getMaterial()).append("</td>")
-                    .append("<td>").append(b.getEingabedatum() != null ? b.getEingabedatum().format(dtf) : "").append("</td>")
-                    .append("<td>").append(b.getRueckgabedatum() != null ? b.getRueckgabedatum().format(dtf) : "").append("</td>")
-                    .append("</tr>");
+                .append("<td>").append(b.getBenutzer()).append("</td>")
+                .append("<td>").append(b.getAnzahl()).append("</td>")
+                .append("<td>").append(b.getMaterial()).append("</td>")
+                .append("<td>").append(b.getEingabedatum() != null ? b.getEingabedatum().format(dtf) : "").append("</td>")
+                .append("<td>").append(b.getRueckgabedatum() != null ? b.getRueckgabedatum().format(dtf) : "").append("</td>")
+                .append("</tr>");
         }
         html.append("</tbody></table>");
         html.append("<form method='get' action='/admin/archiv/export'><button type='submit'>📁 Archiv exportieren (CSV)</button></form>");
@@ -197,11 +209,11 @@ public class AdminController extends BasePageController {
         StringBuilder csv = new StringBuilder("Benutzer,Anzahl,Material,Eingabedatum,Rueckgabedatum\n");
         for (Bestellung b : archiv) {
             csv.append(b.getBenutzer()).append(',')
-                    .append(b.getAnzahl()).append(',')
-                    .append(b.getMaterial()).append(',')
-                    .append(b.getEingabedatum() != null ? b.getEingabedatum() : "").append(',')
-                    .append(b.getRueckgabedatum() != null ? b.getRueckgabedatum() : "")
-                    .append('\n');
+               .append(b.getAnzahl()).append(',')
+               .append(b.getMaterial()).append(',')
+               .append(b.getEingabedatum() != null ? b.getEingabedatum() : "").append(',')
+               .append(b.getRueckgabedatum() != null ? b.getRueckgabedatum() : "")
+               .append('\n');
         }
         byte[] csvBytes = csv.toString().getBytes(StandardCharsets.UTF_8);
         return ResponseEntity.ok()
@@ -247,11 +259,12 @@ public class AdminController extends BasePageController {
     @PostMapping("/archiv/clear")
     public String archivLeeren() {
         service.leereArchiv();
-        return "<script>window.location.href='/admin/archiv';</script>";
+        return "redirect:/admin/archiv";
     }
 
     // ===== Inventar =====
     @GetMapping("/inventar")
+    @ResponseBody
     public String inventarListe() {
         List<Material> inventar = service.getAlleMaterialien();
         StringBuilder html = new StringBuilder();
@@ -260,9 +273,9 @@ public class AdminController extends BasePageController {
         html.append("<table id='inventarTabelle'><thead><tr><th>Name</th><th>Bestand</th></tr></thead><tbody>");
         for (Material m : inventar) {
             html.append("<tr>")
-                    .append("<td>").append(m.getName()).append("</td>")
-                    .append("<td>").append(m.getBestand()).append("</td>")
-                    .append("</tr>");
+                .append("<td>").append(m.getName()).append("</td>")
+                .append("<td>").append(m.getBestand()).append("</td>")
+                .append("</tr>");
         }
         html.append("</tbody></table>");
         html.append("<form method='get' action='/admin/inventar/export-pdf'><button type='submit'>📄 Inventar exportieren (PDF)</button></form>");
