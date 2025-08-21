@@ -1,28 +1,53 @@
-package com.example.myapp.model;
+package com.example.myapp.controller;
 
-import jakarta.persistence.*;
+import com.example.myapp.model.Benutzer;
+import com.example.myapp.service.ListeService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 
-@Entity
-@Table(name = "benutzer", uniqueConstraints = @UniqueConstraint(columnNames = "username"))
-public class Benutzer {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+import java.util.List;
 
-    @Column(nullable = false, unique = true)
-    private String username;
+/**
+ * REST-Controller für Benutzerverwaltung.
+ * ACHTUNG: In dieser Datei darf KEINE öffentliche Klasse "Benutzer" definiert sein.
+ * Verwende stattdessen die Model-Klasse com.example.myapp.model.Benutzer (Import oben).
+ */
+@Controller
+@RequestMapping("/api/benutzer")
+public class BenutzerController {
 
-    @Column(nullable = false)
-    private String passwort;
+    private final ListeService listeService;
 
-    @Column(nullable = false)
-    private String rolle = "USER";
+    public BenutzerController(ListeService listeService) {
+        this.listeService = listeService;
+    }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
-    public String getPasswort() { return passwort; }
-    public void setPasswort(String passwort) { this.passwort = passwort; }
-    public String getRolle() { return rolle; }
-    public void setRolle(String rolle) { this.rolle = rolle; }
+    @GetMapping
+    @ResponseBody
+    public List<Benutzer> list() {
+        return listeService.getAlleBenutzer();
+    }
+
+    @PostMapping
+    public ResponseEntity<Void> create(@RequestParam String username,
+                                       @RequestParam String passwort) {
+        listeService.addBenutzer(username, passwort);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PutMapping
+    public ResponseEntity<Void> update(@RequestParam String oldUsername,
+                                       @RequestParam String newUsername,
+                                       @RequestParam String newPasswort) {
+        listeService.updateBenutzer(oldUsername, newUsername, newPasswort);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Void> delete(@RequestParam String username) {
+        listeService.deleteBenutzer(username);
+        return ResponseEntity.noContent().build();
+    }
 }
