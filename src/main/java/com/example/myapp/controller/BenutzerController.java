@@ -1,101 +1,28 @@
-package com.example.myapp.controller;
+package com.example.myapp.model;
 
-import com.example.myapp.model.Bestellung;
-import com.example.myapp.model.Material;
-import com.example.myapp.service.ListeService;
-import jakarta.servlet.http.HttpSession;
-import org.springframework.web.bind.annotation.*;
+import jakarta.persistence.*;
 
-import java.time.format.DateTimeFormatter;
-import java.util.List;
+@Entity
+@Table(name = "benutzer", uniqueConstraints = @UniqueConstraint(columnNames = "username"))
+public class Benutzer {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-@RestController
-@RequestMapping("/benutzer")
-public class BenutzerController extends BasePageController {
+    @Column(nullable = false, unique = true)
+    private String username;
 
-    private final ListeService service;
+    @Column(nullable = false)
+    private String passwort;
 
-    public BenutzerController(ListeService service) {
-        this.service = service;
-    }
+    @Column(nullable = false)
+    private String rolle = "USER";
 
-    @GetMapping
-    public String benutzerHome(HttpSession session) {
-        String benutzer = (String) session.getAttribute("username");
-        if (benutzer == null) {
-            return "<script>alert('Bitte zuerst einloggen!');window.location.href='/';</script>";
-        }
-
-        return htmlHeader("Benutzerbereich")
-                + "<p>Willkommen, " + benutzer + "</p>"
-                + "<form method='get' action='/benutzer/bestellen'><button type='submit'>Material bestellen</button></form>"
-                + "<form method='get' action='/benutzer/meine-bestellungen'><button type='submit'>Meine Bestellungen</button></form>"
-                + "<form method='get' action='/logout'><button class='btn-back' type='submit'>Logout</button></form>"
-                + breadcrumb("/benutzer", "Benutzerbereich")
-                + htmlFooter();
-    }
-
-    @GetMapping("/bestellen")
-    public String bestellenForm(HttpSession session) {
-        String benutzer = (String) session.getAttribute("username");
-        if (benutzer == null) {
-            return "<script>alert('Bitte zuerst einloggen!');window.location.href='/';</script>";
-        }
-
-        List<Material> materialien = service.getAlleMaterialien();
-        StringBuilder html = new StringBuilder(htmlHeader("Material bestellen"));
-        html.append("<form class='styled-form' method='post' action='/benutzer/bestellen'>");
-        html.append("<label>Material:</label> <select name='material'>");
-        for (Material m : materialien) {
-            html.append("<option value='").append(m.getName()).append("'>")
-                    .append(m.getName()).append(" (Bestand: ").append(m.getBestand()).append(")")
-                    .append("</option>");
-        }
-        html.append("</select>");
-        html.append("<label>Anzahl:</label> <input type='number' name='anzahl' min='1' required>");
-        html.append("<br><button type='submit'>Bestellen</button></form>");
-        html.append("<form method='get' action='/benutzer'><button class='btn-back' type='submit'>Zurück</button></form>");
-        html.append(breadcrumb("/benutzer", "Material bestellen"));
-        html.append(htmlFooter());
-        return html.toString();
-    }
-
-    @PostMapping("/bestellen")
-    public String bestellen(@RequestParam String material, @RequestParam int anzahl, HttpSession session) {
-        String benutzer = (String) session.getAttribute("username");
-        if (benutzer == null) {
-            return "<script>alert('Bitte zuerst einloggen!');window.location.href='/';</script>";
-        }
-        service.addBestellung(benutzer, material, anzahl);
-        return "<script>window.location.href='/benutzer/meine-bestellungen';</script>";
-    }
-
-    @GetMapping("/meine-bestellungen")
-    public String meineBestellungen(HttpSession session) {
-        String benutzer = (String) session.getAttribute("username");
-        if (benutzer == null) {
-            return "<script>alert('Bitte zuerst einloggen!');window.location.href='/';</script>";
-        }
-
-        List<Bestellung> bestellungen = service.getMeineBestellungen(benutzer);
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
-
-        StringBuilder html = new StringBuilder(htmlHeader("Meine Bestellungen"));
-        html.append("<input type='text' class='table-filter' placeholder='Suche Bestellungen...' data-table='meineBestellungenTabelle'>");
-        html.append("<table id='meineBestellungenTabelle'><thead><tr>"
-                + "<th>Material</th><th>Anzahl</th><th>Status</th><th>Eingabedatum</th></tr></thead><tbody>");
-        for (Bestellung b : bestellungen) {
-            html.append("<tr>")
-                    .append("<td>").append(b.getMaterial()).append("</td>")
-                    .append("<td>").append(b.getAnzahl()).append("</td>")
-                    .append("<td>").append(b.getStatus()).append("</td>")
-                    .append("<td>").append(b.getEingabedatum() != null ? b.getEingabedatum().format(dtf) : "").append("</td>")
-                    .append("</tr>");
-        }
-        html.append("</tbody></table>");
-        html.append("<form method='get' action='/benutzer'><button class='btn-back' type='submit'>Zurück</button></form>");
-        html.append(breadcrumb("/benutzer", "Meine Bestellungen"));
-        html.append(htmlFooter());
-        return html.toString();
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+    public String getPasswort() { return passwort; }
+    public void setPasswort(String passwort) { this.passwort = passwort; }
+    public String getRolle() { return rolle; }
+    public void setRolle(String rolle) { this.rolle = rolle; }
 }
