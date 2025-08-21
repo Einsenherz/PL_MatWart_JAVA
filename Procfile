@@ -1,1 +1,1 @@
-web: java -jar target/myapp-0.0.1-SNAPSHOT.jar
+web: java -jar app.jar
