@@ -1,33 +1,34 @@
 package com.example.myapp.model;
 
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
-
-@Entity
-@Table(name = "bestellung")
 public class Bestellung {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    private String benutzer;
+    private String benutzername;
     private String material;
-    private int anzahl;
-    private String status = "in Bearbeitung";
+    private int menge;
+    private String status; // z. B. "Offen", "In Bearbeitung", "Erledigt"
 
-    private LocalDateTime eingabedatum = LocalDateTime.now();
-    private LocalDateTime rueckgabedatum;
+    public Bestellung() {}
 
-    public Long getId() { return id; }
-    public String getBenutzer() { return benutzer; }
-    public void setBenutzer(String benutzer) { this.benutzer = benutzer; }
+    public Bestellung(String benutzername, String material, int menge, String status) {
+        this.benutzername = benutzername;
+        this.material = material;
+        this.menge = menge;
+        this.status = status;
+    }
+
+    public String getBenutzername() { return benutzername; }
+    public void setBenutzername(String benutzername) { this.benutzername = benutzername; }
+
     public String getMaterial() { return material; }
     public void setMaterial(String material) { this.material = material; }
-    public int getAnzahl() { return anzahl; }
-    public void setAnzahl(int anzahl) { this.anzahl = anzahl; }
+
+    public int getMenge() { return menge; }
+    public void setMenge(int menge) { this.menge = menge; }
+
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
-    public LocalDateTime getEingabedatum() { return eingabedatum; }
-    public void setEingabedatum(LocalDateTime eingabedatum) { this.eingabedatum = eingabedatum; }
-    public LocalDateTime getRueckgabedatum() { return rueckgabedatum; }
-    public void setRueckgabedatum(LocalDateTime rueckgabedatum) { this.rueckgabedatum = rueckgabedatum; }
+
+    @Override
+    public String toString() {
+        return benutzername + ";" + material + ";" + menge + ";" + status;
+    }
 }
