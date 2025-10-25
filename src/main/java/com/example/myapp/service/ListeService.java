@@ -40,7 +40,6 @@ public class ListeService {
             Benutzer admin = new Benutzer();
             admin.setUsername("admin");
             admin.setPasswort("admin");
-            admin.setRolle("ADMIN");
             benutzerRepository.save(admin);
         }
     }
@@ -56,7 +55,6 @@ public class ListeService {
         Benutzer b = new Benutzer();
         b.setUsername(username);
         b.setPasswort(passwort);
-        b.setRolle("USER");
         benutzerRepository.save(b);
         syncAll();
     }
