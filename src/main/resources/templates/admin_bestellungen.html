@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Bestellverwaltung</title>
+</head>
+<body>
+<h2>Alle Bestellungen</h2>
+
+<table border="1">
+    <tr><th>#</th><th>Benutzer</th><th>Material</th><th>Menge</th><th>Status</th><th>Aktionen</th></tr>
+    <tr th:each="b,iter : ${bestellungen}">
+        <td th:text="${iter.index}"></td>
+        <td th:text="${b.benutzername}"></td>
+        <td th:text="${b.material}"></td>
+        <td th:text="${b.menge}"></td>
+        <td th:text="${b.status}"></td>
+        <td>
+            <form th:action="@{/admin/bestellungen/status}" method="post">
+                <input type="hidden" name="index" th:value="${iter.index}">
+                <select name="status">
+                    <option>Offen</option>
+                    <option>In Bearbeitung</option>
+                    <option>Erledigt</option>
+                </select>
+                <button type="submit">Ändern</button>
+            </form>
+            <form th:action="@{/admin/bestellungen/loeschen}" method="post"
+                  onsubmit="return confirm('Wirklich löschen?')">
+                <input type="hidden" name="index" th:value="${iter.index}">
+                <button type="submit">Löschen</button>
+            </form>
+        </td>
+    </tr>
+</table>
+
+<a href="/logout">Logout</a>
+</body>
+</html>
