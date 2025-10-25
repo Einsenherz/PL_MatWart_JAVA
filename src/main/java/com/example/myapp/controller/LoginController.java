@@ -1,40 +1,40 @@
 package com.example.myapp.controller;
 
-import com.example.myapp.service.BenutzerService;
-import jakarta.servlet.http.HttpSession;
+import com.example.myapp.model.Benutzer;
+import com.example.myapp.service.ListeService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Controller
 public class LoginController {
-    private final BenutzerService benutzerService;
+    private final ListeService listeService;
 
-    public LoginController(BenutzerService benutzerService) {
-        this.benutzerService = benutzerService;
+    public LoginController(ListeService listeService) {
+        this.listeService = listeService;
     }
 
-    @GetMapping("/")
-    public String loginForm() {
-        return "login";
+    @GetMapping("/login")
+    @ResponseBody
+    public String loginPage() {
+        return "<html><body><form action='/login' method='post'>" +
+                "Benutzername: <input name='username'><br>" +
+                "Passwort: <input type='password' name='password'><br>" +
+                "<input type='submit' value='Login'></form></body></html>";
     }
 
     @PostMapping("/login")
-    public String login(@RequestParam String username, @RequestParam String passwort, HttpSession session) {
-        if (benutzerService.istAdmin(username, passwort)) {
-            session.setAttribute("role", "ADMIN");
+    public String login(@RequestParam String username, @RequestParam String password) {
+        if (username.equals("admin") && password.equals("admin123")) {
             return "redirect:/admin";
-        } else if (benutzerService.existiertBenutzer(username, passwort)) {
-            session.setAttribute("role", "USER");
-            session.setAttribute("username", username);
-            return "redirect:/user";
-        } else {
-            return "redirect:/?error";
         }
-    }
-
-    @GetMapping("/logout")
-    public String logout(HttpSession session) {
-        session.invalidate();
-        return "redirect:/";
+        List<Benutzer> benutzerListe = listeService.ladeBenutzer();
+        for (Benutzer b : benutzerListe) {
+            if (b.getUsername().equals(username) && b.getPassword().equals(password)) {
+                return "redirect:/user_home";
+            }
+        }
+        return "redirect:/login?error=true";
     }
 }
