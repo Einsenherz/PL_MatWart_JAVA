@@ -1,11 +1,6 @@
 package com.example.myapp.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-
-@Entity
 public class Benutzer {
-    @Id
     private String username;
     private String passwort;
 
@@ -20,15 +15,20 @@ public class Benutzer {
         return username;
     }
 
-    public String getPasswort() {
-        return passwort;
-    }
-
     public void setUsername(String username) {
         this.username = username;
     }
 
+    public String getPasswort() {
+        return passwort;
+    }
+
     public void setPasswort(String passwort) {
         this.passwort = passwort;
+    }
+
+    @Override
+    public String toString() {
+        return username + ";" + passwort;
     }
 }
