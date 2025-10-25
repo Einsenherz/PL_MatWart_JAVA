@@ -378,3 +378,22 @@ public class AdminController extends BasePageController {
         }
     }
 }
+
+private String htmlHeader(String title) {
+    return "<html><head><title>" + escape(title) + "</title></head><body><h1>" + escape(title) + "</h1>";
+}
+
+private String htmlFooter() {
+    return "</body></html>";
+}
+
+private String breadcrumb(String name, String link) {
+    return "<nav><a href='/admin'>Admin</a> / <a href='" + link + "'>" + escape(name) + "</a></nav>";
+}
+
+private String escape(String s) {
+    if (s == null) return "";
+    return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+            .replace("\"", "&quot;").replace("'", "&#39;");
+}
+
