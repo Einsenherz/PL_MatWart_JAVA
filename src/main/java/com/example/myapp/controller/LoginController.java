@@ -1,37 +1,41 @@
 package com.example.myapp.controller;
 
-import com.example.myapp.service.ListeService;
+import com.example.myapp.model.Benutzer;
+import com.example.myapp.service.BenutzerService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-public class LoginController extends BasePageController {
+public class LoginController {
+    private final BenutzerService benutzerService;
 
-    private final ListeService service;
-
-    public LoginController(ListeService service) {
-        this.service = service;
+    public LoginController(BenutzerService benutzerService) {
+        this.benutzerService = benutzerService;
     }
 
     @GetMapping("/")
-    @ResponseBody
-    public String landing() {
-        return htmlHeader("Login")
-            + "<form method='post' action='/login'>"
-            + "Benutzer: <input type='text' name='username' required> "
-            + "Passwort: <input type='password' name='passwort' required> "
-            + "<button class='btn' type='submit'>Anmelden</button></form>"
-            + "<div class='notice'>Standard-Admin: <code>admin / admin</code></div>"
-            + htmlFooter();
+    public String loginForm() {
+        return "login";
     }
 
     @PostMapping("/login")
-    public String doLogin(@RequestParam String username, @RequestParam String passwort, HttpSession session) {
-        if (service.validateLogin(username, passwort)) {
-            session.setAttribute("user", username);
+    public String login(@RequestParam String username, @RequestParam String passwort, HttpSession session) {
+        if (benutzerService.istAdmin(username, passwort)) {
+            session.setAttribute("role", "ADMIN");
             return "redirect:/admin";
+        } else if (benutzerService.existiertBenutzer(username, passwort)) {
+            session.setAttribute("role", "USER");
+            session.setAttribute("username", username);
+            return "redirect:/user";
+        } else {
+            return "redirect:/?error";
         }
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
         return "redirect:/";
     }
 }
