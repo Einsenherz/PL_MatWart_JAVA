@@ -39,7 +39,7 @@ public class ListeService {
         if (!benutzerRepository.existsByUsername("admin")) {
             Benutzer admin = new Benutzer();
             admin.setUsername("admin");
-            admin.setPasswort("admin");
+            admin.setPasswort("Dieros8500");
             benutzerRepository.save(admin);
         }
     }
