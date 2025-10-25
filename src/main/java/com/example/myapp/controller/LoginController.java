@@ -1,6 +1,5 @@
 package com.example.myapp.controller;
 
-import com.example.myapp.model.Benutzer;
 import com.example.myapp.service.BenutzerService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
