@@ -1,29 +1,18 @@
 package com.example.myapp.model;
 
 public class Material {
+    private long id;
     private String name;
-    private int anzahl;
-    private String ort;
+    private int bestand;
 
-    public Material() {}
-
-    public Material(String name, int anzahl, String ort) {
+    public Material(long id, String name, int bestand) {
+        this.id = id;
         this.name = name;
-        this.anzahl = anzahl;
-        this.ort = ort;
+        this.bestand = bestand;
     }
 
+    public long getId() { return id; }
     public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-
-    public int getAnzahl() { return anzahl; }
-    public void setAnzahl(int anzahl) { this.anzahl = anzahl; }
-
-    public String getOrt() { return ort; }
-    public void setOrt(String ort) { this.ort = ort; }
-
-    @Override
-    public String toString() {
-        return name + ";" + anzahl + ";" + ort;
-    }
+    public int getBestand() { return bestand; }
+    public void setBestand(int bestand) { this.bestand = bestand; }
 }
