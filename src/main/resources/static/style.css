@@ -1,45 +1,24 @@
 /* ======= Basislayout ======= */
+* {
+    box-sizing: border-box;
+}
+
 body {
     margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
     background: #f5f7fa;
     color: #222;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
-main { padding: 16px; }
-
-.logo {
-    height: 48px;
-    vertical-align: middle;
-    margin-right: 8px;
+main {
+    flex: 1;
+    padding: 16px;
 }
 
-table {
-    border-collapse: collapse;
-    width: 100%;
-    background: #fff;
-}
-
-th, td {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-    text-align: left;
-}
-
-th { background: #f0f0f0; }
-
-a { text-decoration: none; color: #0055cc; }
-
-nav { margin-bottom: 10px; }
-
-button {
-    padding: 8px 14px;
-    background: #0077cc;
-    color: white;
-    border: none;
-    cursor: pointer;
-}
-
+/* ======= Header ======= */
 header {
     background: #ffffff;
     border-bottom: 1px solid #e5e7eb;
@@ -47,9 +26,147 @@ header {
     display: flex;
     align-items: center;
     gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    text-align: center;
 }
 
-h1 { font-size: 20px; margin: 0; }
+.logo {
+    height: 48px;
+    width: auto;
+}
 
-.breadcrumb { margin: 10px 0 16px; font-size: 14px; color: #555; }
-.breadcrumb a { color: #0055cc; }
+h1 {
+    font-size: 20px;
+    margin: 0;
+}
+
+/* ======= Links und Navigation ======= */
+a {
+    text-decoration: none;
+    color: #0055cc;
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: #003d99;
+}
+
+nav {
+    margin: 16px 0;
+    text-align: center;
+}
+
+/* ======= Tabellen ======= */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+th, td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+    font-size: 14px;
+}
+
+th {
+    background: #f0f0f0;
+    font-weight: 600;
+}
+
+.table-container {
+    overflow-x: auto;
+    margin-top: 10px;
+}
+
+/* ======= Buttons ======= */
+button {
+    padding: 10px 16px;
+    background: #0077cc;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background 0.2s, transform 0.1s;
+}
+
+button:hover {
+    background: #005fa3;
+}
+
+button:active {
+    transform: scale(0.97);
+}
+
+/* ======= Formular (Login etc.) ======= */
+form {
+    max-width: 320px;
+    margin: 40px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+label {
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+    color: #333;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="number"],
+select {
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+}
+
+/* ======= Breadcrumbs ======= */
+.breadcrumb {
+    margin: 10px auto 16px;
+    font-size: 14px;
+    color: #555;
+    text-align: center;
+}
+
+.breadcrumb a {
+    color: #0055cc;
+}
+
+/* ======= Responsives Verhalten ======= */
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    h1 {
+        font-size: 18px;
+    }
+
+    table {
+        font-size: 13px;
+    }
+
+    button {
+        width: 100%;
+    }
+
+    form {
+        width: 90%;
+        margin-top: 20px;
+        padding: 16px;
+    }
+}
