@@ -21,7 +21,7 @@ public class BenutzerController extends BasePageController {
     @ResponseBody
     public String list(HttpSession session) {
         Benutzer u = (Benutzer) session.getAttribute("user");
-        if (u == null || !u.isAdmin()) return "Zugriff verweigert";
+        if (u == null || !u.isAdmin()) return "Nicht eingeloggt oder keine Berechtigung";
 
         List<Benutzer> users = csv.readCsv("benutzer.csv").stream()
                 .map(Benutzer::fromCsv).collect(Collectors.toList());
@@ -29,9 +29,10 @@ public class BenutzerController extends BasePageController {
         StringBuilder sb = new StringBuilder(htmlHeader("Benutzerverwaltung"));
         sb.append(breadcrumb("Admin", "Benutzer"));
         sb.append("<table><tr><th>Benutzername</th><th>Admin</th></tr>");
-        for (Benutzer b : users)
+        for (Benutzer b : users) {
             sb.append("<tr><td>").append(escape(b.getUsername())).append("</td><td>")
-                    .append(b.isAdmin() ? "Ja" : "Nein").append("</td></tr>");
+              .append(b.isAdmin() ? "Ja" : "Nein").append("</td></tr>");
+        }
         sb.append("</table><a href='/admin'>Zurück</a>");
         sb.append(htmlFooter());
         return sb.toString();
