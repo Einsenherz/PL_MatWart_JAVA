@@ -9,6 +9,6 @@ public class LogoutController extends BasePageController {
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/";
+        return "redirect:/login";
     }
 }
