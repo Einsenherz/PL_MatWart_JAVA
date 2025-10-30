@@ -21,9 +21,14 @@ public class Material {
     public void setName(String name) { this.name = name; }
     public void setBestand(int bestand) { this.bestand = bestand; }
 
-    public String[] toCsv() { return new String[]{String.valueOf(id), name, String.valueOf(bestand)}; }
+    public String[] toCsv() {
+        return new String[]{String.valueOf(id), name, String.valueOf(bestand)};
+    }
 
     public static Material fromCsv(String[] data) {
+        if (data == null || data.length < 3) {
+            return new Material(0, "", 0);
+        }
         return new Material(Integer.parseInt(data[0]), data[1], Integer.parseInt(data[2]));
     }
 }
