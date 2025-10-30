@@ -46,6 +46,13 @@ public class BestellungController extends BasePageController {
         }
 
         sb.append("</table></div>");
+        sb.append("<tr>")
+          .append("<td data-label='ID'>").append(b.getId()).append("</td>")
+          .append("<td data-label='Benutzer'>").append(escape(b.getBenutzer())).append("</td>")
+          .append("<td data-label='Material'>").append(escape(b.getMaterial())).append("</td>")
+          .append("<td data-label='Anzahl'>").append(b.getAnzahl()).append("</td>")
+          .append("<td data-label='Status'>").append(escape(b.getStatus())).append("</td>")
+          .append("</tr>");
 
         // Formular: Bestellung hinzufügen (nur User)
         if (!u.isAdmin()) {
