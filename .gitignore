@@ -1,0 +1,15 @@
+# Maven & IntelliJ
+target/
+*.iml
+.idea/
+*.log
+*.class
+.DS_Store
+
+# Systemdateien
+*.tmp
+*.bak
+*.swp
+
+# Docker-Cache
+*.tar
