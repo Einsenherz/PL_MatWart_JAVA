@@ -1,0 +1,12 @@
+# Ignoriere unnötige Dateien beim Docker-Build
+target
+.git
+.gitignore
+README.md
+*.iml
+.idea
+*.log
+*.tmp
+*.bak
+*.swp
+.DS_Store
