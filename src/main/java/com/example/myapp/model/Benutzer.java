@@ -27,6 +27,9 @@ public class Benutzer {
     }
 
     public static Benutzer fromCsv(String[] data) {
+        if (data == null || data.length < 3) {
+            return new Benutzer("", "", false);
+        }
         return new Benutzer(data[0], data[1], Boolean.parseBoolean(data[2]));
     }
 }
