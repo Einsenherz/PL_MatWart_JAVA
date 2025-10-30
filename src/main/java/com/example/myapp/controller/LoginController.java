@@ -16,26 +16,37 @@ public class LoginController extends BasePageController {
 
     @Autowired
     private CsvStorageService csv;
+
     @Autowired
     private AuthService auth;
 
-    @GetMapping("/")
-    public String loginForm() {
+    @GetMapping({"/", "/login"})
+    public String loginPage() {
+        // Thymeleaf-Template "login.html" unter src/main/resources/templates
         return "login";
     }
 
     @PostMapping("/login")
     @ResponseBody
-    public String login(@RequestParam String username, @RequestParam String password, HttpSession session) {
+    public String doLogin(@RequestParam String username,
+                          @RequestParam String password,
+                          HttpSession session) {
+
         List<Benutzer> users = csv.readCsv("benutzer.csv").stream()
                 .map(Benutzer::fromCsv).collect(Collectors.toList());
 
         Benutzer user = auth.findByUsername(users, username);
         if (auth.checkPassword(user, password)) {
             session.setAttribute("user", user);
-            if (user.isAdmin()) return "<meta http-equiv='refresh' content='0;url=/admin'>";
-            else return "<meta http-equiv='refresh' content='0;url=/home'>";
+            if (user.isAdmin()) {
+                return "<meta http-equiv='refresh' content='0;url=/admin'>";
+            } else {
+                return "<meta http-equiv='refresh' content='0;url=/home'>";
+            }
         }
-        return htmlHeader("Login") + "<p>Falscher Benutzername oder Passwort.</p><a href='/'>Zurück</a>" + htmlFooter();
+        return htmlHeader("Login")
+                + "<p>Falscher Benutzername oder Passwort.</p>"
+                + "<a href='/login'>Zurück</a>"
+                + htmlFooter();
     }
 }
