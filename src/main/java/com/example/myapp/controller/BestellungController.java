@@ -36,24 +36,17 @@ public class BestellungController extends BasePageController {
         for (Bestellung b : best) {
             if (u.isAdmin() || b.getBenutzer().equalsIgnoreCase(u.getUsername())) {
                 sb.append("<tr>")
-                  .append("<td>").append(b.getId()).append("</td>")
-                  .append("<td>").append(escape(b.getBenutzer())).append("</td>")
-                  .append("<td>").append(escape(b.getMaterial())).append("</td>")
-                  .append("<td>").append(b.getAnzahl()).append("</td>")
-                  .append("<td>").append(escape(b.getStatus())).append("</td>")
+                  .append("<td data-label='ID'>").append(b.getId()).append("</td>")
+                  .append("<td data-label='Benutzer'>").append(escape(b.getBenutzer())).append("</td>")
+                  .append("<td data-label='Material'>").append(escape(b.getMaterial())).append("</td>")
+                  .append("<td data-label='Anzahl'>").append(b.getAnzahl()).append("</td>")
+                  .append("<td data-label='Status'>").append(escape(b.getStatus())).append("</td>")
                   .append("</tr>");
             }
         }
 
         sb.append("</table></div>");
-        sb.append("<tr>")
-          .append("<td data-label='ID'>").append(b.getId()).append("</td>")
-          .append("<td data-label='Benutzer'>").append(escape(b.getBenutzer())).append("</td>")
-          .append("<td data-label='Material'>").append(escape(b.getMaterial())).append("</td>")
-          .append("<td data-label='Anzahl'>").append(b.getAnzahl()).append("</td>")
-          .append("<td data-label='Status'>").append(escape(b.getStatus())).append("</td>")
-          .append("</tr>");
-
+        
         // Formular: Bestellung hinzufügen (nur User)
         if (!u.isAdmin()) {
             sb.append("<h3>Neue Bestellung</h3>");
