@@ -36,16 +36,16 @@ public class AdminController extends BasePageController {
 
         StringBuilder sb = new StringBuilder(htmlHeader("Admin-Dashboard"));
         sb.append(breadcrumb("Admin", "Übersicht"));
-        sb.append("<h2>Statistik</h2><ul>")
+        sb.append("<h2>Admin Übersicht</h2><ul>")
                 .append("<li>Benutzer: ").append(users.size()).append("</li>")
                 .append("<li>Materialien: ").append(mats.size()).append("</li>")
                 .append("<li>Bestellungen: ").append(bests.size()).append("</li>")
                 .append("</ul>");
-        sb.append("<nav><a href='/benutzer'>Benutzer</a> | <a href='/material'>Material</a> | <a href='/bestellungen'>Bestellungen</a></nav>");
         sb.append("<nav>")
-  .append("<a href='/admin/benutzer'>Benutzer</a> | ")
-  .append("<a href='/admin/bestellungen'>Bestellungen</a>")
-  .append("</nav>");
+                .append("<a href='/admin/benutzer'>Benutzerverwaltung</a> | ")
+                .append("<a href='/admin/bestellungen'>Bestellungen</a>")
+                .append("</nav>");
+        sb.append(htmlFooter());
         return sb.toString();
     }
 }
