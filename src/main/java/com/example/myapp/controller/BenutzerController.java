@@ -52,6 +52,13 @@ public class BenutzerController extends BasePageController {
           .append("</form>");
 
         sb.append("<nav><a href='/admin'>Zurück zur Übersicht</a></nav>");
+        sb.append("<tr>")
+          .append("<td data-label='ID'>").append(b.getId()).append("</td>")
+          .append("<td data-label='Benutzer'>").append(escape(b.getBenutzer())).append("</td>")
+          .append("<td data-label='Material'>").append(escape(b.getMaterial())).append("</td>")
+          .append("<td data-label='Anzahl'>").append(b.getAnzahl()).append("</td>")
+          .append("<td data-label='Status'>").append(escape(b.getStatus())).append("</td>")
+          .append("</tr>");
         sb.append(htmlFooter());
         return sb.toString();
     }
