@@ -8,13 +8,14 @@ import java.util.List;
 public class AuthService {
 
     public Benutzer findByUsername(List<Benutzer> users, String username) {
+        if (users == null) return null;
         return users.stream()
-                .filter(u -> u.getUsername().equalsIgnoreCase(username))
+                .filter(u -> u.getUsername() != null && u.getUsername().equalsIgnoreCase(username))
                 .findFirst()
                 .orElse(null);
     }
 
     public boolean checkPassword(Benutzer user, String password) {
-        return user != null && user.getPassword().equals(password);
+        return user != null && user.getPassword() != null && user.getPassword().equals(password);
     }
 }
