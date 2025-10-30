@@ -1,22 +1,37 @@
+/* ======= Basislayout ======= */
 body {
-    font-family: Arial, sans-serif;
-    margin: 30px;
-    background: #f8f8f8;
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f5f7fa;
+    color: #222;
 }
+
+main { padding: 16px; }
+
+.logo {
+    height: 48px;
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
 table {
     border-collapse: collapse;
     width: 100%;
-    margin: 20px 0;
+    background: #fff;
 }
+
 th, td {
-    border: 1px solid #ccc;
-    padding: 8px;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
 }
-th {
-    background: #e0e0e0;
-}
+
+th { background: #f0f0f0; }
+
 a { text-decoration: none; color: #0055cc; }
+
 nav { margin-bottom: 10px; }
+
 button {
     padding: 8px 14px;
     background: #0077cc;
@@ -25,24 +40,16 @@ button {
     cursor: pointer;
 }
 
-/* ======= Header-Leiste oben ======= */
 header {
-    background-color: #8B5A2B; /* brauner Balken */
-    color: white;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 12px 16px;
     display: flex;
     align-items: center;
-    padding: 8px 20px;
-    height: 60px;
+    gap: 12px;
 }
 
-header img.logo {
-    height: 45px;
-    margin-right: 15px;
-}
+h1 { font-size: 20px; margin: 0; }
 
-header h1 {
-    font-size: 22px;
-    margin: 0;
-    color: white;
-}
-
+.breadcrumb { margin: 10px 0 16px; font-size: 14px; color: #555; }
+.breadcrumb a { color: #0055cc; }
