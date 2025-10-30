@@ -42,7 +42,10 @@ public class AdminController extends BasePageController {
                 .append("<li>Bestellungen: ").append(bests.size()).append("</li>")
                 .append("</ul>");
         sb.append("<nav><a href='/benutzer'>Benutzer</a> | <a href='/material'>Material</a> | <a href='/bestellungen'>Bestellungen</a></nav>");
-        sb.append(htmlFooter());
+        sb.append("<nav>")
+  .append("<a href='/admin/benutzer'>Benutzer</a> | ")
+  .append("<a href='/admin/bestellungen'>Bestellungen</a>")
+  .append("</nav>");
         return sb.toString();
     }
 }
