@@ -25,7 +25,7 @@ public class CsvStorageService {
         List<String[]> result = new ArrayList<>();
 
         try {
-            // 1️⃣ Versuch: externe Datei (z. B. beim Entwickeln)
+            // 1.Versuch: externe Datei (z. B. beim Entwickeln)
             Path path = Path.of("src/main/csv_lists", filename);
             if (Files.exists(path)) {
                 try (BufferedReader br = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
@@ -37,7 +37,7 @@ public class CsvStorageService {
                 }
             }
 
-            // 2️⃣ Versuch: im Classpath (z. B. im JAR bei Render)
+            // 2.Versuch: im Classpath (z. B. im JAR bei Render)
             InputStream in = getClass().getClassLoader().getResourceAsStream(RESOURCE_FOLDER + "/" + filename);
             if (in != null) {
                 try (BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
