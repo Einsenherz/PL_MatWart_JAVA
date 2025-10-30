@@ -4,10 +4,24 @@ import org.springframework.ui.Model;
 
 public abstract class BasePageController {
 
-    protected String htmlHeader(String title) {
-        return "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>" + title + "</title>"
-                + "<link rel='stylesheet' href='/style.css'></head><body><header><h1>" + title + "</h1></header><main>";
-    }
+protected String htmlHeader(String title) {
+    return """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset='UTF-8'>
+            <title>""" + title + """</title>
+            <link rel='stylesheet' href='/style.css'>
+        </head>
+        <body>
+            <header>
+                <img src='/images/Logo_Pfadi_Panthera_Leo.png' class='logo' alt='Pfadi Panthera Leo Logo'>
+                <h1>""" + title + """</h1>
+            </header>
+            <main>
+        """;
+}
+
 
     protected String htmlFooter() {
         return "</main><footer><p>&copy; 2025 MatWart</p></footer></body></html>";
