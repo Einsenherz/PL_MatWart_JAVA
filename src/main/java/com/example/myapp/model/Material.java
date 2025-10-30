@@ -1,46 +1,29 @@
 package com.example.myapp.model;
 
 public class Material {
-    private long id;
+    private int id;
     private String name;
     private int bestand;
 
-    public Material(long id, String name, int bestand) {
+    public Material() {}
+
+    public Material(int id, String name, int bestand) {
         this.id = id;
         this.name = name;
         this.bestand = bestand;
     }
 
-    public long getId() {
-        return id;
-    }
+    public int getId() { return id; }
+    public String getName() { return name; }
+    public int getBestand() { return bestand; }
 
-    public void setId(long id) {
-        this.id = id;
-    }
+    public void setId(int id) { this.id = id; }
+    public void setName(String name) { this.name = name; }
+    public void setBestand(int bestand) { this.bestand = bestand; }
 
-    public String getName() {
-        return name;
-    }
+    public String[] toCsv() { return new String[]{String.valueOf(id), name, String.valueOf(bestand)}; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getBestand() {
-        return bestand;
-    }
-
-    public void setBestand(int bestand) {
-        this.bestand = bestand;
-    }
-
-    @Override
-    public String toString() {
-        return "Material{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", bestand=" + bestand +
-                '}';
+    public static Material fromCsv(String[] data) {
+        return new Material(Integer.parseInt(data[0]), data[1], Integer.parseInt(data[2]));
     }
 }
