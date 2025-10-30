@@ -13,26 +13,37 @@ public class CsvStorageService {
     @Value("${app.data.dir:src/main/csv_lists}")
     private String dataFolder;
 
-    public List<String[]> readCsv(String name) {
-        List<String[]> result = new ArrayList<>();
-        try {
-            Path path = Path.of(dataFolder, name);
-            if (!Files.exists(path)) {
-                Files.createDirectories(path.getParent());
-                Files.createFile(path);
+public List<String[]> readCsv(String name) {
+    List<String[]> result = new ArrayList<>();
+    try {
+        // 1. Prüfen: Externer Pfad
+        Path externalPath = Path.of(dataFolder, name);
+        if (Files.exists(externalPath)) {
+            try (BufferedReader br = Files.newBufferedReader(externalPath, StandardCharsets.UTF_8)) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    result.add(line.split(";", -1));
+                }
                 return result;
             }
-            try (BufferedReader br = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+        }
+
+        // 2. Prüfen: classpath (falls als Ressource im JAR)
+        InputStream resource = getClass().getClassLoader().getResourceAsStream("csv_lists/" + name);
+        if (resource != null) {
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(resource, StandardCharsets.UTF_8))) {
                 String line;
                 while ((line = br.readLine()) != null) {
                     result.add(line.split(";", -1));
                 }
             }
-        } catch (IOException e) {
-            throw new RuntimeException("Fehler beim Lesen von " + name, e);
         }
-        return result;
+
+    } catch (IOException e) {
+        throw new RuntimeException("Fehler beim Lesen von " + name, e);
     }
+    return result;
+}
 
     public void writeCsv(String name, List<String[]> data) {
         try {
