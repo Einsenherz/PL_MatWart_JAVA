@@ -18,6 +18,27 @@ public class BenutzerController extends BasePageController {
     private CsvStorageService csv;
 
     @GetMapping
+@PostMapping("/add")
+@ResponseBody
+public String addUser(@RequestParam String username,
+                      @RequestParam String password,
+                      @RequestParam(defaultValue = "false") boolean admin) {
+
+    List<String[]> data = csv.readCsv("benutzer.csv");
+    data.add(new String[]{username, password, String.valueOf(admin)});
+    csv.writeCsv("benutzer.csv", data);
+
+    return "<meta http-equiv='refresh' content='0;url=/benutzer'>";
+}
+
+@PostMapping("/delete")
+@ResponseBody
+public String deleteUser(@RequestParam String username) {
+    List<String[]> data = csv.readCsv("benutzer.csv");
+    data.removeIf(r -> r[0].equalsIgnoreCase(username));
+    csv.writeCsv("benutzer.csv", data);
+    return "<meta http-equiv='refresh' content='0;url=/benutzer'>";
+}
     @ResponseBody
     public String list(HttpSession session) {
         Benutzer u = (Benutzer) session.getAttribute("user");
