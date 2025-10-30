@@ -46,7 +46,7 @@ public class BestellungController extends BasePageController {
         }
 
         sb.append("</table></div>");
-        
+
         // Formular: Bestellung hinzufügen (nur User)
         if (!u.isAdmin()) {
             sb.append("<h3>Neue Bestellung</h3>");
