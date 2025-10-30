@@ -28,19 +28,17 @@ public class BenutzerController extends BasePageController {
 
         StringBuilder sb = new StringBuilder(htmlHeader("Benutzerverwaltung"));
         sb.append(breadcrumb("Admin", "Benutzerverwaltung"));
-        sb.append("<table><tr><th>Benutzername</th><th>Admin</th></tr>");
+        sb.append("<div class='table-container'><table>")
+          .append("<tr><th>Benutzername</th><th>Admin</th></tr>");
+
         for (Benutzer b : users) {
-            sb.append("<tr><td>").append(escape(b.getUsername())).append("</td><td>")
-              .append(b.isAdmin() ? "Ja" : "Nein").append("</td></tr>");
-                sb.append("<tr>")
-                  .append("<td data-label='ID'>").append(b.getId()).append("</td>")
-                  .append("<td data-label='Benutzer'>").append(escape(b.getBenutzer())).append("</td>")
-                  .append("<td data-label='Material'>").append(escape(b.getMaterial())).append("</td>")
-                  .append("<td data-label='Anzahl'>").append(b.getAnzahl()).append("</td>")
-                  .append("<td data-label='Status'>").append(escape(b.getStatus())).append("</td>")
-                  .append("</tr>");
+            sb.append("<tr>")
+              .append("<td data-label='Benutzername'>").append(escape(b.getUsername())).append("</td>")
+              .append("<td data-label='Admin'>").append(b.isAdmin() ? "Ja" : "Nein").append("</td>")
+              .append("</tr>");
         }
-        sb.append("</table>");
+
+        sb.append("</table></div>");
 
         // Formular Benutzer hinzufügen
         sb.append("<h3>Neuen Benutzer hinzufügen</h3>");
