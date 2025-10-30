@@ -30,10 +30,15 @@ public class Bestellung {
     public void setStatus(String status) { this.status = status; }
 
     public String[] toCsv() {
-        return new String[]{String.valueOf(id), benutzer, material, String.valueOf(anzahl), status};
+        return new String[]{
+                String.valueOf(id), benutzer, material, String.valueOf(anzahl), status
+        };
     }
 
     public static Bestellung fromCsv(String[] d) {
+        if (d == null || d.length < 5) {
+            return new Bestellung(0, "", "", 0, "");
+        }
         return new Bestellung(Integer.parseInt(d[0]), d[1], d[2], Integer.parseInt(d[3]), d[4]);
     }
 }
