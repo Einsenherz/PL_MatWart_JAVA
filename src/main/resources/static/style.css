@@ -1,4 +1,4 @@
-/* ======= Basislayout ======= */
+/* ======= Grundlayout ======= */
 * {
     box-sizing: border-box;
 }
@@ -25,8 +25,8 @@ header {
     padding: 12px 16px;
     display: flex;
     align-items: center;
-    gap: 12px;
     justify-content: center;
+    gap: 12px;
     flex-wrap: wrap;
     text-align: center;
 }
@@ -37,31 +37,36 @@ header {
 }
 
 h1 {
-    font-size: 20px;
+    font-size: 22px;
     margin: 0;
 }
 
-/* ======= Links und Navigation ======= */
+/* ======= Navigation ======= */
+nav {
+    text-align: center;
+    margin: 16px 0;
+}
+
 a {
+    color: #0066cc;
     text-decoration: none;
-    color: #0055cc;
-    transition: color 0.2s;
+    font-weight: 500;
 }
 
 a:hover {
-    color: #003d99;
-}
-
-nav {
-    margin: 16px 0;
-    text-align: center;
+    text-decoration: underline;
 }
 
 /* ======= Tabellen ======= */
+.table-container {
+    overflow-x: auto;
+    margin-top: 10px;
+}
+
 table {
     border-collapse: collapse;
     width: 100%;
-    background: #fff;
+    background: white;
     border-radius: 8px;
     overflow: hidden;
 }
@@ -76,11 +81,6 @@ th, td {
 th {
     background: #f0f0f0;
     font-weight: 600;
-}
-
-.table-container {
-    overflow-x: auto;
-    margin-top: 10px;
 }
 
 /* ======= Buttons ======= */
@@ -103,17 +103,17 @@ button:active {
     transform: scale(0.97);
 }
 
-/* ======= Formular (Login etc.) ======= */
+/* ======= Formulare ======= */
 form {
-    max-width: 320px;
-    margin: 40px auto;
-    padding: 20px;
     background: white;
-    border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    padding: 14px;
+    margin: 20px auto;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    max-width: 500px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 10px;
 }
 
 label {
@@ -126,38 +126,57 @@ label {
 input[type="text"],
 input[type="password"],
 input[type="number"],
+input[type="checkbox"],
 select {
-    padding: 8px 10px;
+    padding: 8px;
     border-radius: 6px;
     border: 1px solid #ccc;
     font-size: 15px;
 }
 
-/* ======= Breadcrumbs ======= */
+/* ======= Breadcrumb ======= */
 .breadcrumb {
-    margin: 10px auto 16px;
-    font-size: 14px;
-    color: #555;
     text-align: center;
+    color: #666;
+    margin-bottom: 10px;
+    font-size: 14px;
 }
 
-.breadcrumb a {
-    color: #0055cc;
-}
-
-/* ======= Responsives Verhalten ======= */
+/* ======= Kartenansicht für kleine Bildschirme ======= */
 @media (max-width: 768px) {
-    header {
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    h1 {
-        font-size: 18px;
+    table, thead, tbody, th, td, tr {
+        display: block;
     }
 
     table {
-        font-size: 13px;
+        border: none;
+        box-shadow: none;
+    }
+
+    thead {
+        display: none;
+    }
+
+    tr {
+        margin-bottom: 15px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        padding: 10px;
+    }
+
+    td {
+        border: none;
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 10px;
+        font-size: 15px;
+    }
+
+    td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #444;
     }
 
     button {
@@ -166,7 +185,10 @@ select {
 
     form {
         width: 90%;
-        margin-top: 20px;
         padding: 16px;
+    }
+
+    h1 {
+        font-size: 20px;
     }
 }
