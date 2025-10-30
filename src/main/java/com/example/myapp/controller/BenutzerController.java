@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Controller
@@ -19,15 +21,46 @@ public class BenutzerController extends BasePageController {
 
     @GetMapping
     @ResponseBody
-    public String list(HttpSession session) {
+    public String list(
+            HttpSession session,
+            @RequestParam(value = "q", required = false) String query
+    ) {
         Benutzer u = (Benutzer) session.getAttribute("user");
         if (u == null || !u.isAdmin()) return "Nicht eingeloggt oder keine Berechtigung";
 
-        List<Benutzer> users = csv.readCsv("benutzer.csv").stream()
-                .map(Benutzer::fromCsv).collect(Collectors.toList());
+        // Alle Benutzer laden & sortieren
+        List<Benutzer> allUsers = csv.readCsv("benutzer.csv").stream()
+                .map(Benutzer::fromCsv)
+                .sorted(Comparator.comparing(b -> b.getUsername().toLowerCase(Locale.ROOT)))
+                .collect(Collectors.toList());
+
+        // Optional filtern (Suche)
+        List<Benutzer> users = allUsers;
+        String effectiveQuery = query == null ? "" : query.trim();
+        if (!effectiveQuery.isEmpty()) {
+            String qLower = effectiveQuery.toLowerCase(Locale.ROOT);
+            users = allUsers.stream()
+                    .filter(b -> b.getUsername() != null && b.getUsername().toLowerCase(Locale.ROOT).contains(qLower))
+                    .collect(Collectors.toList());
+        }
 
         StringBuilder sb = new StringBuilder(htmlHeader("Benutzerverwaltung"));
         sb.append(breadcrumb("Admin", "Benutzerverwaltung"));
+
+        // Suchleiste mit datalist (Vorschläge)
+        sb.append("<h3>Benutzer suchen</h3>");
+        sb.append("<form action='/admin/benutzer' method='get' class='form-inline'>")
+          .append("<input type='text' name='q' list='userOptions' placeholder='Benutzername suchen' value='").append(escape(effectiveQuery)).append("' /> ")
+          .append("<datalist id='userOptions'>");
+        for (Benutzer b : allUsers) {
+            sb.append("<option value='").append(escape(b.getUsername())).append("'></option>");
+        }
+        sb.append("</datalist>")
+          .append("<button type='submit'>Suchen</button> ")
+          .append("<a href='/admin/benutzer' class='btn-link'>Zurücksetzen</a>")
+          .append("</form>");
+
+        // Tabelle
         sb.append("<div class='table-container'><table>")
           .append("<tr><th>Benutzername</th><th>Admin</th></tr>");
 
@@ -40,20 +73,35 @@ public class BenutzerController extends BasePageController {
 
         sb.append("</table></div>");
 
-        // Formular Benutzer hinzufügen
+        // Formular: Benutzer hinzufügen
         sb.append("<h3>Neuen Benutzer hinzufügen</h3>");
         sb.append("<form action='/admin/benutzer/add' method='post'>")
-          .append("Name: <input name='username' required> ")
-          .append("Passwort: <input name='password' required> ")
-          .append("Admin: <input type='checkbox' name='admin'> ")
+          .append("<label>Name:")
+          .append("<input name='username' required>")
+          .append("</label>")
+          .append("<label>Passwort:")
+          .append("<input name='password' required>")
+          .append("</label>")
+          .append("<label style='display:flex;align-items:center;gap:8px;'>")
+          .append("<input type='checkbox' name='admin'> Admin")
+          .append("</label>")
           .append("<button type='submit'>Hinzufügen</button>")
           .append("</form>");
 
-        // Formular Benutzer löschen
+        // Formular: Benutzer löschen (Dropdown + Bestätigung)
         sb.append("<h3>Benutzer löschen</h3>");
-        sb.append("<form action='/admin/benutzer/delete' method='post'>")
-          .append("Name: <input name='username' required> ")
-          .append("<button type='submit'>Löschen</button>")
+        sb.append("<form action='/admin/benutzer/delete' method='post' onsubmit=\"return confirm('Willst du diesen Benutzer wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.');\">")
+          .append("<label>Benutzer auswählen:")
+          .append("<select name='username' required>");
+        for (Benutzer b : allUsers) {
+            sb.append("<option value='").append(escape(b.getUsername())).append("'>")
+              .append(escape(b.getUsername()))
+              .append(b.isAdmin() ? " (Admin)" : "")
+              .append("</option>");
+        }
+        sb.append("</select>")
+          .append("</label>")
+          .append("<button type='submit' style='background:#c12525;'>Löschen</button>")
           .append("</form>");
 
         sb.append("<nav><a href='/admin'>Zurück zur Übersicht</a></nav>");
