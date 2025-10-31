@@ -1,34 +1,30 @@
 package com.example.myapp.model;
 
 public class Material {
-    private int id;
     private String name;
+    private String beschreibung;
     private int bestand;
 
-    public Material() {}
-
-    public Material(int id, String name, int bestand) {
-        this.id = id;
+    public Material(String name, String beschreibung, int bestand) {
         this.name = name;
+        this.beschreibung = beschreibung;
         this.bestand = bestand;
     }
 
-    public int getId() { return id; }
-    public String getName() { return name; }
-    public int getBestand() { return bestand; }
-
-    public void setId(int id) { this.id = id; }
-    public void setName(String name) { this.name = name; }
-    public void setBestand(int bestand) { this.bestand = bestand; }
+    public static Material fromCsv(String[] arr) {
+        String name = arr[0];
+        String beschreibung = arr.length > 1 ? arr[1] : "";
+        int bestand = arr.length > 2 ? Integer.parseInt(arr[2]) : 0;
+        return new Material(name, beschreibung, bestand);
+    }
 
     public String[] toCsv() {
-        return new String[]{String.valueOf(id), name, String.valueOf(bestand)};
+        return new String[]{name, beschreibung, String.valueOf(bestand)};
     }
 
-    public static Material fromCsv(String[] data) {
-        if (data == null || data.length < 3) {
-            return new Material(0, "", 0);
-        }
-        return new Material(Integer.parseInt(data[0]), data[1], Integer.parseInt(data[2]));
-    }
+    public String getName() { return name; }
+    public String getBeschreibung() { return beschreibung; }
+    public int getBestand() { return bestand; }
+
+    public void setBestand(int bestand) { this.bestand = bestand; }
 }
