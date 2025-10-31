@@ -1,45 +1,79 @@
 package com.example.myapp.model;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+
 public class Bestellung {
     private int id;
     private String benutzer;
     private String material;
     private int anzahl;
     private String status;
+    private String eingabeZeit;
+    private String updated;
 
-    public Bestellung() {}
+    private static final ZoneId ZONE = ZoneId.of("Europe/Zurich");
+    private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
-    public Bestellung(int id, String benutzer, String material, int anzahl, String status) {
+    public Bestellung(int id, String benutzer, String material, int anzahl, String status,
+                      String eingabeZeit, String updated) {
         this.id = id;
         this.benutzer = benutzer;
         this.material = material;
         this.anzahl = anzahl;
         this.status = status;
+        this.eingabeZeit = eingabeZeit;
+        this.updated = updated;
     }
 
+    // CSV → Bestellung
+    public static Bestellung fromCsv(String[] arr) {
+        try {
+            int id = Integer.parseInt(arr[0]);
+            String benutzer = arr[1];
+            String material = arr[2];
+            int anzahl = Integer.parseInt(arr[3]);
+            String status = arr[4];
+            String eingabe = arr.length > 5 ? arr[5] : FMT.format(LocalDateTime.now(ZONE));
+            String updated = arr.length > 6 ? arr[6] : eingabe;
+            return new Bestellung(id, benutzer, material, anzahl, status, eingabe, updated);
+        } catch (Exception e) {
+            return new Bestellung(0, "?", "?", 0, "Offen",
+                    FMT.format(LocalDateTime.now(ZONE)),
+                    FMT.format(LocalDateTime.now(ZONE)));
+        }
+    }
+
+    // Bestellung → CSV
+    public String[] toCsv() {
+        return new String[]{
+                String.valueOf(id),
+                benutzer,
+                material,
+                String.valueOf(anzahl),
+                status,
+                eingabeZeit,
+                updated
+        };
+    }
+
+    // Getter
     public int getId() { return id; }
     public String getBenutzer() { return benutzer; }
     public String getMaterial() { return material; }
     public int getAnzahl() { return anzahl; }
     public String getStatus() { return status; }
+    public String getEingabeZeit() { return eingabeZeit; }
+    public String getUpdated() { return updated; }
 
-    public void setId(int id) { this.id = id; }
-    public void setBenutzer(String benutzer) { this.benutzer = benutzer; }
-    public void setMaterial(String material) { this.material = material; }
-    public void setAnzahl(int anzahl) { this.anzahl = anzahl; }
-    public void setStatus(String status) { this.status = status; }
-
-    public String[] toCsv() {
-        return new String[]{
-                String.valueOf(id), benutzer, material, String.valueOf(anzahl), status
-        };
+    // Setter
+    public void setStatus(String status) {
+        this.status = status;
+        this.updated = FMT.format(LocalDateTime.now(ZONE));
     }
 
-    public static Bestellung fromCsv(String[] d) {
-        if (d == null || d.length < 5) {
-            return new Bestellung(0, "", "", 0, "");
-        }
-        return new Bestellung(Integer.parseInt(d[0]), d[1], d[2], Integer.parseInt(d[3]), d[4]);
+    public void setUpdated(String updated) {
+        this.updated = updated;
     }
 }
-
