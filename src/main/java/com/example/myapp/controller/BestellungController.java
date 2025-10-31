@@ -31,20 +31,15 @@ public class BestellungController extends BasePageController {
         Benutzer u = (Benutzer) session.getAttribute("user");
         if (u == null) return "Nicht eingeloggt";
 
-        // Daten einlesen
+        // CSV-Daten laden
         List<Bestellung> best = csv.readCsv("bestellungen.csv").stream()
-                .map(Bestellung::fromCsv)
-                .collect(Collectors.toList());
-
+                .map(Bestellung::fromCsv).collect(Collectors.toList());
         List<Benutzer> allUsers = csv.readCsv("benutzer.csv").stream()
-                .map(Benutzer::fromCsv)
-                .collect(Collectors.toList());
-
+                .map(Benutzer::fromCsv).collect(Collectors.toList());
         List<Material> mats = csv.readCsv("material.csv").stream()
-                .map(Material::fromCsv)
-                .collect(Collectors.toList());
+                .map(Material::fromCsv).collect(Collectors.toList());
 
-        // Filterung (Admin kann Benutzer auswählen)
+        // Filter für Admin (nach Benutzer)
         if (filterUser != null && !filterUser.isEmpty() && u.isAdmin()) {
             best = best.stream()
                     .filter(b -> b.getBenutzer().equalsIgnoreCase(filterUser))
@@ -55,14 +50,14 @@ public class BestellungController extends BasePageController {
                     .collect(Collectors.toList());
         }
 
-        // HTML Aufbau
+        // HTML Header
         StringBuilder sb = new StringBuilder(htmlHeader("Bestellungen"));
         sb.append(breadcrumb(u.isAdmin() ? "Admin" : "Home", "Bestellungen"));
 
-        // Suchfeld (Admin)
+        // Benutzerfilter (Admin)
         if (u.isAdmin()) {
             sb.append("<form action='/admin/bestellungen' method='get' class='form-inline'>")
-              .append("<label>Benutzer filtern: ")
+              .append("<label>Benutzer: ")
               .append("<input type='text' name='user' list='userlist' placeholder='Benutzername' value='")
               .append(filterUser == null ? "" : escape(filterUser)).append("' />")
               .append("<datalist id='userlist'>");
@@ -70,20 +65,28 @@ public class BestellungController extends BasePageController {
                 sb.append("<option value='").append(escape(bu.getUsername())).append("'></option>");
             sb.append("</datalist>")
               .append("<button type='submit'>Filtern</button>")
-              .append("<a href='/admin/bestellungen' class='btn-link'>Zurücksetzen</a>")
+              .append("<a href='/admin/bestellungen' class='btn-link'>Alle</a>")
               .append("</label></form>");
         }
 
+        // Tabelle
         sb.append("<div class='table-container'><table>")
           .append("<tr><th>ID</th><th>Benutzer</th><th>Material</th><th>Anzahl</th><th>Status</th><th>Eingabezeit</th><th>Updated</th></tr>");
 
         for (Bestellung b : best) {
-            sb.append("<tr>")
+            String status = b.getStatus();
+            String colorClass =
+                    status.equalsIgnoreCase("Erledigt") ? "status-done" :
+                    status.equalsIgnoreCase("Abgeschlossen") ? "status-finished" :
+                    "status-open";
+
+            sb.append("<tr class='").append(colorClass).append("'>")
               .append("<td data-label='ID'>").append(b.getId()).append("</td>")
               .append("<td data-label='Benutzer'>").append(escape(b.getBenutzer())).append("</td>")
               .append("<td data-label='Material'>").append(escape(b.getMaterial())).append("</td>")
               .append("<td data-label='Anzahl'>").append(b.getAnzahl()).append("</td>")
-              .append("<td data-label='Status'>").append(escape(b.getStatus())).append("</td>")
+              .append("<td data-label='Status'>").append("<span class='status-tag ").append(colorClass).append("'>")
+              .append(escape(status)).append("</span></td>")
               .append("<td data-label='Eingabezeit'>").append(escape(b.getEingabeZeit())).append("</td>")
               .append("<td data-label='Updated'>").append(escape(b.getUpdated())).append("</td>")
               .append("</tr>");
@@ -91,37 +94,31 @@ public class BestellungController extends BasePageController {
 
         sb.append("</table></div>");
 
-        // Formular: Bestellung hinzufügen (nur User)
+        // Formular: neue Bestellung (nur User)
         if (!u.isAdmin()) {
-            sb.append("<h3>Neue Bestellung</h3>");
-            sb.append("<form action='/bestellungen/add' method='post'>");
-
-            // Mehrere Materialien mit Mengen
-            sb.append("<div id='multiItems'>");
-            sb.append(renderMaterialSelect(mats, 1));
-            sb.append("</div>");
-            sb.append("<button type='button' onclick='addItem()'>+ weiteres Material</button><br><br>");
-            sb.append("<button type='submit'>Bestellen</button>");
-            sb.append("</form>");
-
-            // JS zur dynamischen Materialauswahl
-            sb.append("<script>")
-              .append("function addItem(){const d=document.getElementById('multiItems');const c=d.children.length+1;")
-              .append("d.insertAdjacentHTML('beforeend',`").append(renderMaterialSelect(mats, -1).replace("`", "\\`")).append("`);}")
+            sb.append("<h3>Neue Bestellung</h3>")
+              .append("<form action='/bestellungen/add' method='post'>")
+              .append("<div id='multiItems'>").append(renderMaterialSelect(mats, 1)).append("</div>")
+              .append("<button type='button' onclick='addItem()'>+ weiteres Material</button><br><br>")
+              .append("<button type='submit'>Bestellen</button>")
+              .append("</form>")
+              .append("<script>")
+              .append("function addItem(){const d=document.getElementById('multiItems');d.insertAdjacentHTML('beforeend',`")
+              .append(renderMaterialSelect(mats,-1).replace("`","\\`")).append("`);}")
               .append("</script>");
         }
 
-        // Formular: Bestellung löschen
-        sb.append("<h3>Bestellung löschen</h3>");
-        sb.append("<form action='/bestellungen/delete' method='post'>")
-          .append("ID: <input type='number' name='id' required> ")
+        // Formular: löschen
+        sb.append("<h3>Bestellung löschen</h3>")
+          .append("<form action='/bestellungen/delete' method='post'>")
+          .append("ID: <input type='number' name='id' required>")
           .append("<button type='submit' style='background:#b22'>Löschen</button>")
           .append("</form>");
 
-        // Formular: Status ändern (nur Admin)
+        // Formular: Status ändern (Admin)
         if (u.isAdmin()) {
-            sb.append("<h3>Bestellstatus ändern</h3>");
-            sb.append("<form action='/bestellungen/status' method='post'>")
+            sb.append("<h3>Bestellstatus ändern</h3>")
+              .append("<form action='/bestellungen/status' method='post'>")
               .append("ID: <input type='number' name='id' required> ")
               .append("Status: <select name='status'>")
               .append("<option value='Offen'>Offen</option>")
@@ -132,28 +129,27 @@ public class BestellungController extends BasePageController {
               .append("</form>");
         }
 
-        sb.append("<nav><a href='").append(u.isAdmin() ? "/admin" : "/home").append("'>Zurück</a></nav>");
-        sb.append(htmlFooter());
+        sb.append("<nav><a href='").append(u.isAdmin() ? "/admin" : "/home").append("'>Zurück</a></nav>")
+          .append(htmlFooter());
         return sb.toString();
     }
 
-    // Mehrfach-Materialauswahl mit Max-Bestellmenge
+    // Materialauswahl
     private String renderMaterialSelect(List<Material> mats, int index) {
-        StringBuilder s = new StringBuilder();
-        s.append("<div class='material-line'>");
-        s.append("Material: <input list='mats' name='material' required placeholder='Material suchen...'> ");
-        s.append("<datalist id='mats'>");
+        StringBuilder s = new StringBuilder("<div class='material-line'>");
+        s.append("Material: <input list='mats' name='material' required placeholder='Material suchen...'> ")
+         .append("<datalist id='mats'>");
         for (Material m : mats) {
-            s.append("<option value='").append(escape(m.getName()))
-             .append("' data-max='").append(m.getBestand()).append("'>")
-             .append("</option>");
+            s.append("<option value='").append(escape(m.getName())).append("' data-max='")
+             .append(m.getBestand()).append("'></option>");
         }
-        s.append("</datalist>");
-        s.append("Anzahl: <input type='number' name='anzahl' min='1' required>");
-        s.append("</div>");
+        s.append("</datalist>")
+         .append("Anzahl: <input type='number' name='anzahl' min='1' required>")
+         .append("</div>");
         return s.toString();
     }
 
+    // POST: Neue Bestellung
     @PostMapping("/add")
     @ResponseBody
     public String addBestellung(HttpSession session,
@@ -164,27 +160,24 @@ public class BestellungController extends BasePageController {
 
         List<String[]> rows = csv.readCsv("bestellungen.csv");
         int id = rows.size() + 1;
-
         LocalDateTime now = LocalDateTime.now();
 
         for (int i = 0; i < material.size(); i++) {
-            String mat = material.get(i);
-            int qty = anzahl.get(i);
             rows.add(new String[]{
                     String.valueOf(id++),
                     u.getUsername(),
-                    mat,
-                    String.valueOf(qty),
+                    material.get(i),
+                    String.valueOf(anzahl.get(i)),
                     "Offen",
                     fmt.format(now),
                     fmt.format(now)
             });
         }
-
         csv.writeCsv("bestellungen.csv", rows);
         return "<meta http-equiv='refresh' content='0;url=/bestellungen'>";
     }
 
+    // POST: Löschen
     @PostMapping("/delete")
     @ResponseBody
     public String deleteBestellung(@RequestParam int id, HttpSession session) {
@@ -201,6 +194,7 @@ public class BestellungController extends BasePageController {
         return "<meta http-equiv='refresh' content='0;url=/bestellungen'>";
     }
 
+    // POST: Status ändern + Lagerlogik + Zeitupdate
     @PostMapping("/status")
     @ResponseBody
     public String updateStatus(@RequestParam int id,
@@ -216,19 +210,16 @@ public class BestellungController extends BasePageController {
             if (Integer.parseInt(r[0]) == id) {
                 String oldStatus = r[4];
                 r[4] = status;
-                r[6] = fmt.format(LocalDateTime.now()); // Updated
-
-                // Materialbestand anpassen
+                r[6] = fmt.format(LocalDateTime.now());
                 String matName = r[2];
                 int qty = Integer.parseInt(r[3]);
+
                 for (String[] m : mats) {
                     if (m[0].equalsIgnoreCase(matName)) {
                         int bestand = Integer.parseInt(m[2]);
                         if (!oldStatus.equals(status)) {
-                            if (status.equalsIgnoreCase("Erledigt"))
-                                bestand -= qty;
-                            else if (status.equalsIgnoreCase("Abgeschlossen"))
-                                bestand += qty;
+                            if (status.equalsIgnoreCase("Erledigt")) bestand -= qty;
+                            else if (status.equalsIgnoreCase("Abgeschlossen")) bestand += qty;
                         }
                         m[2] = String.valueOf(Math.max(bestand, 0));
                     }
