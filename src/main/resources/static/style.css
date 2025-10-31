@@ -192,3 +192,27 @@ select {
         font-size: 20px;
     }
 }
+
+/* ======= Statusfarben ======= */
+.status-tag {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    color: #fff;
+}
+.status-open { background: #007bff; }
+.status-done { background: #f0ad4e; }
+.status-finished { background: #5cb85c; }
+
+/* Tabellenzeilen leicht einfärben */
+tr.status-open { background: #eaf3ff; }
+tr.status-done { background: #fff7e5; }
+tr.status-finished { background: #e9f9ea; }
+
+/* Materialzeilen */
+.material-line {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 8px;
+}
